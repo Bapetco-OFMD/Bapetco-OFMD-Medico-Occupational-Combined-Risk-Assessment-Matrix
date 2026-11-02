@@ -6,5 +6,5 @@
 
 window.OMHSQ_CONFIG = {
   SUPABASE_URL: "https://oafvsazddiwgjjhwwgix.supabase.co",
-  SUPABASE_PUBLISHABLE_KEY: "ضع_المفتاح_العام_هنا"
+  SUPABASE_PUBLISHABLE_KEY: "sb_publishable_taGzahKGBo4ASZwo_IptNw_gnC4uBrh"
 };
