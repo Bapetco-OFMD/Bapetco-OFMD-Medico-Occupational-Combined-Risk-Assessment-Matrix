@@ -1,0 +1,452 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#315c68">
+  <meta name="description" content="OMHSQ - Confidential Occupational Mental Health Support">
+  <title>OMHSQ | الصحة النفسية المهنية</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">O</div>
+    <div>
+      <strong>OMHSQ</strong>
+      <small data-i18n="subtitle">استبيان الصحة النفسية المهنية</small>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button id="languageBtn" class="btn btn-ghost" type="button">
+      English
+    </button>
+    <button id="logoutBtn" class="btn btn-ghost hidden"
+      type="button" data-i18n="logout">
+      تسجيل الخروج
+    </button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Pilot notice -->
+  <section id="notice" class="notice">
+    <strong data-i18n="pilotTitle">نسخة تأسيسية تجريبية</strong>
+    <p data-i18n="pilotText">
+      هذه النسخة لإدارة طلبات الدعم وبناء النظام التقني.
+      لا تقدم تشخيصاً نفسياً ولا تستخدم في قرارات التوظيف أو اللياقة الطبية.
+    </p>
+  </section>
+
+  <!-- Authentication -->
+  <section id="authPanel" class="panel narrow hidden">
+
+    <h1 data-i18n="welcome">مرحباً بك</h1>
+
+    <p class="muted" data-i18n="authIntro">
+      سجّل الدخول أو أنشئ حساباً للوصول إلى منصة الدعم السري.
+    </p>
+
+    <div class="tabs">
+      <button id="loginTab" class="tab active" type="button"
+        data-i18n="login">تسجيل الدخول</button>
+
+      <button id="signupTab" class="tab" type="button"
+        data-i18n="signup">إنشاء حساب</button>
+    </div>
+
+    <form id="authForm">
+
+      <label for="email" data-i18n="email">البريد الإلكتروني</label>
+      <input id="email" type="email" autocomplete="email"
+        required placeholder="name@example.com">
+
+      <label for="password" data-i18n="password">كلمة المرور</label>
+      <input id="password" type="password"
+        autocomplete="current-password" minlength="8" required>
+
+      <button id="authSubmit" class="btn btn-primary full"
+        type="submit" data-i18n="login">
+        تسجيل الدخول
+      </button>
+
+    </form>
+
+    <button id="forgotBtn" class="text-button" type="button"
+      data-i18n="forgot">
+      نسيت كلمة المرور؟
+    </button>
+
+    <p id="authMessage" class="message" aria-live="polite"></p>
+  </section>
+
+
+  <!-- Password recovery -->
+  <section id="recoveryPanel" class="panel narrow hidden">
+
+    <h1 data-i18n="recoveryTitle">تعيين كلمة مرور جديدة</h1>
+
+    <p class="muted" data-i18n="recoveryIntro">
+      أدخل كلمة المرور الجديدة لحسابك.
+    </p>
+
+    <form id="recoveryForm">
+
+      <label for="newPassword" data-i18n="newPassword">
+        كلمة المرور الجديدة
+      </label>
+
+      <input id="newPassword" type="password"
+        minlength="8" autocomplete="new-password" required>
+
+      <label for="confirmNewPassword" data-i18n="confirmPassword">
+        تأكيد كلمة المرور
+      </label>
+
+      <input id="confirmNewPassword" type="password"
+        minlength="8" autocomplete="new-password" required>
+
+      <button id="recoverySubmit" class="btn btn-primary full"
+        type="submit" data-i18n="savePassword">
+        حفظ كلمة المرور
+      </button>
+
+    </form>
+
+    <p id="recoveryMessage" class="message" aria-live="polite"></p>
+  </section>
+
+
+  <!-- Worker area -->
+  <section id="workerPanel" class="panel hidden">
+
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow" data-i18n="stageOne">المرحلة الأولى</p>
+        <h1 data-i18n="workerTitle">طلب الدعم والمتابعة</h1>
+      </div>
+
+      <span class="status-pill" data-i18n="private">سري</span>
+    </div>
+
+    <p class="muted" data-i18n="workerIntro">
+      يمكنك استخدام هذه المنصة لطلب المعلومات أو الدعم النفسي المهني.
+    </p>
+
+
+    <!-- Privacy and consent -->
+    <section id="consentPanel" class="privacy-box">
+
+      <h3 data-i18n="privacyTitle">الموافقة والخصوصية</h3>
+
+      <p data-i18n="privacyText">
+        تُحفظ معلوماتك في قاعدة بيانات مقيّدة الوصول،
+        وتتاح للمختصين المخولين وفق صلاحياتهم.
+        لا تستخدم هذه المعلومات في قرارات التوظيف أو الترقية أو اللياقة الطبية.
+      </p>
+
+      <p id="consentStatus" class="message" aria-live="polite"></p>
+
+      <form id="consentForm">
+
+        <label class="check consent">
+          <input id="consentAccept" type="checkbox" required>
+          <span data-i18n="consentText">
+            أوافق طوعياً على المشاركة وحفظ المعلومات لغرض التواصل وتقديم الدعم.
+          </span>
+        </label>
+
+        <button id="grantConsentBtn" class="btn btn-primary"
+          type="submit" data-i18n="grantConsent">
+          الموافقة والمتابعة
+        </button>
+
+      </form>
+
+      <button id="withdrawConsentBtn"
+        class="btn btn-secondary hidden"
+        type="button" data-i18n="withdrawConsent">
+        سحب الموافقة
+      </button>
+
+      <p id="consentMessage" class="message" aria-live="polite"></p>
+
+    </section>
+
+
+    <!-- Support request -->
+    <form id="supportForm" class="hidden">
+
+      <fieldset>
+        <legend data-i18n="domainsTitle">
+          ما المجالات التي ترغب في الحصول على معلومات أو دعم بشأنها؟
+        </legend>
+
+        <p class="muted small" data-i18n="domainsHint">
+          يمكنك اختيار أكثر من مجال أو تركها دون تحديد.
+        </p>
+
+        <div class="check-grid">
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="mood">
+            <span data-i18n="dMood">المزاج وفقدان الاهتمام</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="anxiety">
+            <span data-i18n="dAnxiety">القلق والتوتر</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="sleep">
+            <span data-i18n="dSleep">النوم والإرهاق</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="stress">
+            <span data-i18n="dStress">ضغوط العمل والحياة</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="trauma">
+            <span data-i18n="dTrauma">التعامل مع حادث أو تجربة صادمة</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="relationships">
+            <span data-i18n="dRelationships">العلاقات والدعم الاجتماعي</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" name="domains" value="other">
+            <span data-i18n="dOther">موضوع آخر</span>
+          </label>
+
+        </div>
+      </fieldset>
+
+
+      <fieldset>
+        <legend data-i18n="helpTitle">
+          هل ترغب في التواصل مع مختص لتقديم الدعم؟
+        </legend>
+
+        <div class="radio-row">
+
+          <label class="check">
+            <input type="radio" name="help_request" value="yes" required>
+            <span data-i18n="yes">نعم</span>
+          </label>
+
+          <label class="check">
+            <input type="radio" name="help_request" value="no">
+            <span data-i18n="no">لا حالياً</span>
+          </label>
+
+          <label class="check">
+            <input type="radio" name="help_request" value="information">
+            <span data-i18n="infoOnly">معلومات فقط</span>
+          </label>
+
+        </div>
+      </fieldset>
+
+
+      <fieldset class="safety-field">
+
+        <legend data-i18n="safetyTitle">سؤال السلامة العاجلة</legend>
+
+        <p data-i18n="safetyQuestion">
+          هل تشعر الآن أنك قد تؤذي نفسك أو شخصاً آخر،
+          أو أنك غير قادر على الحفاظ على سلامتك؟
+        </p>
+
+        <div class="radio-row">
+
+          <label class="check">
+            <input type="radio" name="urgent_safety" value="yes" required>
+            <span data-i18n="yes">نعم</span>
+          </label>
+
+          <label class="check">
+            <input type="radio" name="urgent_safety" value="no">
+            <span data-i18n="no">لا</span>
+          </label>
+
+          <label class="check">
+            <input type="radio" name="urgent_safety" value="prefer_not">
+            <span data-i18n="preferNot">أفضل عدم الإجابة</span>
+          </label>
+
+        </div>
+
+        <p class="urgent-help" data-i18n="urgentHelp">
+          إذا كنت في خطر فوري، لا تنتظر رد التطبيق:
+          تواصل مع خدمات الطوارئ أو أقرب قسم طوارئ الآن.
+          هذا التطبيق ليس خدمة طوارئ ولا تتم مراقبته لحظياً.
+        </p>
+
+      </fieldset>
+
+
+      <label for="notes" data-i18n="notesLabel">
+        ملاحظة اختيارية (يرجى عدم كتابة تفاصيل شديدة الحساسية)
+      </label>
+
+      <textarea id="notes" rows="3" maxlength="1000"></textarea>
+
+
+      <label class="check consent">
+        <input id="confirmAccuracy" type="checkbox" required>
+        <span data-i18n="confirmText">
+          أؤكد أن المعلومات التي أدخلتها تعبر عن رغبتي الحالية في طلب الدعم.
+        </span>
+      </label>
+
+      <button id="submitRequestBtn" class="btn btn-primary"
+        type="submit" data-i18n="submitRequest">
+        إرسال الطلب السري
+      </button>
+
+      <p id="formMessage" class="message" aria-live="polite"></p>
+
+    </form>
+
+  </section>
+
+
+  <!-- Professional dashboard -->
+  <section id="professionalPanel" class="panel hidden">
+
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">OMHSQ</p>
+        <h1 data-i18n="professionalTitle">لوحة المختص النفسي</h1>
+      </div>
+
+      <span class="status-pill" data-i18n="restricted">
+        وصول مقيّد
+      </span>
+    </div>
+
+    <p class="muted" data-i18n="professionalIntro">
+      تعرض هذه اللوحة طلبات الدعم المسندة إليك فقط.
+    </p>
+
+    <button id="refreshProfessional"
+      class="btn btn-secondary" type="button"
+      data-i18n="refresh">
+      تحديث القائمة
+    </button>
+
+    <p id="professionalMessage" class="message"
+      aria-live="polite"></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="date">التاريخ</th>
+            <th data-i18n="request">طلب التواصل</th>
+            <th data-i18n="domains">المجالات</th>
+            <th data-i18n="safety">السلامة العاجلة</th>
+            <th data-i18n="status">الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="professionalRows"></tbody>
+      </table>
+    </div>
+
+  </section>
+
+
+  <!-- System owner dashboard -->
+  <section id="ownerPanel" class="panel hidden">
+
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">OMHSQ</p>
+        <h1 data-i18n="ownerTitle">لوحة مالك النظام</h1>
+      </div>
+
+      <span class="status-pill" data-i18n="ownerBadge">
+        صلاحيات مالك النظام
+      </span>
+    </div>
+
+    <p class="muted" data-i18n="ownerIntro">
+      لوحة مخصصة لمالك النظام لإدارة ومراجعة سجلات المنصة وفق الصلاحيات المعتمدة.
+    </p>
+
+    <button id="refreshOwner"
+      class="btn btn-secondary" type="button"
+      data-i18n="refresh">
+      تحديث القائمة
+    </button>
+
+    <p id="ownerMessage" class="message"
+      aria-live="polite"></p>
+
+    <h3 data-i18n="allRequests">جميع طلبات الدعم</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="date">التاريخ</th>
+            <th data-i18n="request">طلب التواصل</th>
+            <th data-i18n="domains">المجالات</th>
+            <th data-i18n="safety">السلامة العاجلة</th>
+            <th data-i18n="status">الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="ownerRows"></tbody>
+      </table>
+    </div>
+
+    <p class="muted small" data-i18n="ownerPrivacyNote">
+      لا توجد صلاحيات مخصصة للموارد البشرية أو المديرين التشغيليين للاطلاع على هذه البيانات.
+    </p>
+
+  </section>
+
+
+  <!-- Confirmation -->
+  <section id="confirmationPanel" class="panel narrow hidden">
+
+    <h2 data-i18n="savedTitle">تم استلام طلبك</h2>
+
+    <p data-i18n="savedText">
+      شكراً لك. تم حفظ طلبك. لا تستخدم التطبيق في حالات الطوارئ.
+    </p>
+
+    <button id="backToWorker" class="btn btn-secondary"
+      type="button" data-i18n="backToForm">
+      العودة إلى الصفحة
+    </button>
+
+  </section>
+
+</main>
+
+
+<footer>
+  <span>OMHSQ • Technical Pilot</span>
+  <span data-i18n="footer">
+    نسخة تجريبية – لا تستخدم للتشخيص أو قرارات اللياقة
+  </span>
+</footer>
+
+</body>
+</html>
