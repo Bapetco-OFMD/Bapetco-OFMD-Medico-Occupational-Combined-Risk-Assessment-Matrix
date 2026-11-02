@@ -5,6 +5,6 @@
   NEVER place service_role / secret keys, database passwords, or SMTP credentials here.
 */
 window.OMHSQ_CONFIG = {
-  SUPABASE_URL: "https://YOUR-PROJECT-REF.supabase.co",
+  SUPABASE_URL: "https://oafvsazddiwgjjhwwgix.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_taGzahKGBo4ASZwo_IptNw_gnC4uBrh"
 };
