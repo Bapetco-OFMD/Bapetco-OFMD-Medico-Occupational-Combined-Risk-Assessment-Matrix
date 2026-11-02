@@ -1,4 +1,17 @@
 
+/*
+ * OMHSQ — Occupational Mental Health Screening Questionnaire
+ * Application controller
+ *
+ * Privacy version: OMHSQ-PRIVACY-1.0
+ *
+ * IMPORTANT:
+ * - This is a technical pilot.
+ * - Not a diagnostic or clinical assessment tool.
+ * - Not for recruitment, promotion, HR or Fitness for Work decisions.
+ * - Never place Supabase service_role keys in this file.
+ */
+
 (() => {
   "use strict";
 
@@ -8,7 +21,7 @@
 
   const $ = (id) => document.getElementById(id);
 
-  const CONSENT_VERSION = "OMHSQ-PRIVACY-0.1";
+  const CONSENT_VERSION = "OMHSQ-PRIVACY-1.0";
 
   const config = window.OMHSQ_CONFIG || {};
 
@@ -18,7 +31,8 @@
     !config.SUPABASE_URL.includes("YOUR-") &&
     typeof config.SUPABASE_PUBLISHABLE_KEY === "string" &&
     config.SUPABASE_PUBLISHABLE_KEY.length > 10 &&
-    !config.SUPABASE_PUBLISHABLE_KEY.includes("YOUR_");
+    !config.SUPABASE_PUBLISHABLE_KEY.includes("YOUR_") &&
+    !config.SUPABASE_PUBLISHABLE_KEY.includes("YOUR-");
 
   let client = null;
 
@@ -48,12 +62,17 @@
   const translations = {
     en: {
       subtitle: "Occupational Mental Health Screening Questionnaire",
+
       pilotTitle: "Technical pilot version",
+
       pilotText:
         "This platform manages confidential support requests. It does not diagnose or classify mental disorders and must not be used for fitness, recruitment, employment or personnel decisions.",
 
       welcome: "Welcome",
-      authIntro: "Sign in or create an account to access the confidential support platform.",
+
+      authIntro:
+        "Sign in or create an account to access the confidential support platform.",
+
       login: "Sign in",
       signup: "Create account",
       email: "Email address",
@@ -70,12 +89,14 @@
       stageOne: "Support services",
       workerTitle: "Support and follow-up request",
       private: "Confidential",
+
       workerIntro:
         "Use this form to indicate areas in which you would like information or support. You may request help without selecting any area.",
 
       privacyTitle: "Consent and privacy",
+
       privacyText:
-        "Your information is stored in a restricted database and is accessible only to authorized personnel according to their assigned permissions. It is not used for recruitment, promotion or medical fitness decisions. Confidentiality may have limits where there is an imminent risk to your safety or someone else's, in accordance with applicable medical and legal procedures.",
+        "Your information is stored in a restricted-access database. Authorized mental health professionals can access only the support requests assigned to them. The System Owner has elevated administrative access to records for platform governance, administration and security oversight. Administrative changes to records are recorded in the audit log. HR and operational managers have no access to individual support requests and must not use this information for recruitment, promotion or medical fitness decisions. Confidentiality may be subject to limited exceptions where there is an imminent risk to your safety or someone else's, in accordance with applicable medical and legal procedures.",
 
       consentText:
         "I voluntarily agree to participate and allow my information to be stored for contact and support purposes after reading the privacy statement.",
@@ -83,18 +104,39 @@
       grantConsent: "Agree and continue",
       withdrawConsent: "Withdraw my consent",
 
-      consentNotGiven: "No active consent is recorded. Please review and accept the privacy statement before submitting a request.",
-      consentActive: "Your consent is active. You may submit a support request.",
-      consentWithdrawn: "Your consent has been withdrawn. New support requests are disabled.",
-      consentGrantedSuccess: "Your consent has been recorded successfully.",
-      consentWithdrawSuccess: "Your consent has been withdrawn successfully.",
+      consentNotGiven:
+        "No active consent is recorded. Please review and accept the privacy statement before submitting a request.",
+
+      consentActive:
+        "Your consent is active. You may submit a support request.",
+
+      consentWithdrawn:
+        "Your consent has been withdrawn. New support requests are disabled.",
+
+      consentUpdateRequired:
+        "The privacy statement has been updated. You must withdraw your previous consent first, then review and accept the new statement to continue.",
+
+      consentGrantedSuccess:
+        "Your consent has been recorded successfully.",
+
+      consentWithdrawSuccess:
+        "Your consent has been withdrawn successfully.",
+
       consentWithdrawConfirm:
         "Are you sure you want to withdraw your consent? You will not be able to submit new support requests until you grant consent again.",
-      consentRequired: "Active consent is required before submitting a request.",
-      consentError: "Could not update your consent. Please try again.",
 
-      domainsTitle: "Which areas would you like information or support about?",
-      domainsHint: "Select any number of areas, or leave them blank.",
+      consentRequired:
+        "Active consent is required before submitting a request.",
+
+      consentError:
+        "Could not update your consent. Please try again.",
+
+      domainsTitle:
+        "Which areas would you like information or support about?",
+
+      domainsHint:
+        "Select any number of areas, or leave them blank.",
+
       dMood: "Mood and loss of interest",
       dAnxiety: "Anxiety and stress",
       dSleep: "Sleep and fatigue",
@@ -103,12 +145,15 @@
       dRelationships: "Relationships and social support",
       dOther: "Another topic",
 
-      helpTitle: "Would you like to be contacted by a professional for support?",
+      helpTitle:
+        "Would you like to be contacted by a professional for support?",
+
       yes: "Yes",
       no: "Not at this time",
       infoOnly: "Information only",
 
       safetyTitle: "Immediate safety question",
+
       safetyQuestion:
         "Do you feel at this moment that you might harm yourself or someone else, or that you cannot keep yourself safe?",
 
@@ -117,23 +162,27 @@
       urgentHelp:
         "If you are in immediate danger, do not wait for this app: contact local emergency services or the nearest emergency department now, and ask a trusted person to stay with you. This platform is not an emergency service and is not monitored in real time.",
 
-      notesLabel: "Optional note (please do not include highly sensitive details)",
+      notesLabel:
+        "Optional note (please do not include highly sensitive details)",
+
       confirmText:
         "I confirm that the information I entered reflects my current wish to seek support.",
 
       submitRequest: "Submit confidential request",
-      adminTitle: "Authorized dashboard",
+
       professionalTitle: "Professional dashboard",
+
       professionalIntro:
         "This dashboard displays only support requests assigned to your professional account.",
+
       ownerTitle: "System Owner Dashboard",
       ownerBadge: "System Owner",
+
       ownerIntro:
         "Restricted system-owner view of support requests and platform records.",
+
       ownerPrivacyNote:
         "HR and operational managers do not have access to individual psychological support records.",
-      allRequests: "All support requests",
-      restricted: "Restricted access",
 
       refresh: "Refresh list",
       date: "Date",
@@ -143,13 +192,17 @@
       status: "Status",
 
       savedTitle: "Your request has been received",
+
       savedText:
         "Thank you. Your request has been saved. If you requested contact, it will be handled through the approved follow-up process. Do not use this platform in an emergency.",
+
       backToForm: "Return to the form",
 
-      footer: "Pilot version – not for diagnosis or fitness decisions",
+      footer:
+        "Pilot version – not for diagnosis or fitness decisions",
 
       noRequests: "No requests available.",
+
       yesShort: "Yes",
       noShort: "No",
       statusPreferNot: "Prefer not to answer",
@@ -162,23 +215,48 @@
       configMissing:
         "Please configure the Supabase URL and publishable key in supabase-config.js.",
 
-      loginError: "Sign-in failed. Check your email and password.",
+      loginError:
+        "Sign-in failed. Check your email and password.",
+
       signupSent:
         "Account created. Check your email for the confirmation link before signing in.",
-      signupError: "Could not create the account.",
+
+      signupError:
+        "Could not create the account.",
+
       resetSent:
         "If the address is registered, a password reset email has been sent.",
-      resetError: "Could not send the reset email.",
-      sessionError: "Could not verify your session.",
-      roleError: "Your account role could not be verified. Please contact the system administrator.",
-      adminError: "Unable to load authorized requests. Check your permissions.",
-      professionalError: "Unable to load your assigned requests.",
-      submitError: "Could not save your request. Please try again.",
-      invalidPassword: "The passwords do not match or are too short.",
-      passwordSaved: "Your password has been updated successfully.",
-      passwordError: "Could not update your password.",
+
+      resetError:
+        "Could not send the reset email.",
+
+      sessionError:
+        "Could not verify your session.",
+
+      roleError:
+        "Your account role could not be verified. Please contact the system administrator.",
+
+      adminError:
+        "Unable to load authorized requests. Check your permissions.",
+
+      professionalError:
+        "Unable to load your assigned requests.",
+
+      submitError:
+        "Could not save your request. Please try again.",
+
+      invalidPassword:
+        "The passwords do not match or are too short.",
+
+      passwordSaved:
+        "Your password has been updated successfully.",
+
+      passwordError:
+        "Could not update your password.",
+
       accessDenied: "Access denied.",
       processing: "Please wait...",
+
       domainMood: "Mood",
       domainAnxiety: "Anxiety",
       domainSleep: "Sleep",
@@ -190,12 +268,17 @@
 
     ar: {
       subtitle: "استبيان الصحة النفسية المهنية",
+
       pilotTitle: "نسخة تأسيسية تجريبية",
+
       pilotText:
         "تُستخدم هذه المنصة لإدارة طلبات الدعم السري. لا تقدم تشخيصاً أو تصنيفاً نفسياً، ولا تستخدم في قرارات اللياقة أو التوظيف أو الوضع الوظيفي.",
 
       welcome: "مرحباً بك",
-      authIntro: "سجّل الدخول أو أنشئ حساباً للوصول إلى منصة الدعم السري.",
+
+      authIntro:
+        "سجّل الدخول أو أنشئ حساباً للوصول إلى منصة الدعم السري.",
+
       login: "تسجيل الدخول",
       signup: "إنشاء حساب",
       email: "البريد الإلكتروني",
@@ -212,12 +295,14 @@
       stageOne: "خدمات الدعم",
       workerTitle: "طلب الدعم والمتابعة",
       private: "سري",
+
       workerIntro:
         "يتيح لك هذا النموذج تحديد مجالات الدعم التي ترغب في مناقشتها. يمكنك طلب المساعدة حتى دون تحديد أي مجال.",
 
       privacyTitle: "الموافقة والخصوصية",
+
       privacyText:
-        "تُحفظ معلوماتك في قاعدة بيانات مقيّدة الوصول، ولا يطلع عليها إلا الأشخاص المخوّلون وفق صلاحياتهم. لا تستخدم هذه البيانات لاتخاذ قرارات التوظيف أو الترقية أو اللياقة الطبية. توجد حدود للسرية إذا ظهر خطر وشيك على سلامتك أو سلامة الآخرين، وفق الإجراءات الطبية والقانونية المعمول بها.",
+        "تُحفظ بياناتك في قاعدة بيانات مقيّدة الوصول. يستطيع المختص النفسي المخوّل الاطلاع على طلبات الدعم المسندة إليه فقط، بينما يمتلك مالك النظام صلاحية إدارية عليا تتيح له الاطلاع على السجلات لأغراض إدارة المنصة وحوكمتها ومراجعة أمنها، وتُسجّل التغييرات الإدارية على السجلات وفق سجل التدقيق. لا تملك إدارة الموارد البشرية أو المديرون التشغيليون صلاحية الاطلاع على طلبات الدعم الفردية أو استخدامها في قرارات التوظيف أو الترقية أو اللياقة الطبية. وقد تُطبق استثناءات السرية عند وجود خطر وشيك على سلامتك أو سلامة الآخرين، وفق الإجراءات الطبية والقانونية المعمول بها.",
 
       consentText:
         "أوافق طوعياً على المشاركة وحفظ المعلومات لغرض التواصل وتقديم الدعم، بعد قراءة بيان الخصوصية.",
@@ -227,19 +312,37 @@
 
       consentNotGiven:
         "لا توجد موافقة سارية مسجلة. يرجى قراءة بيان الخصوصية والموافقة عليه قبل إرسال أي طلب.",
+
       consentActive:
         "موافقتك سارية. يمكنك الآن إرسال طلب الدعم.",
+
       consentWithdrawn:
         "تم سحب موافقتك. لن تتمكن من إرسال طلبات دعم جديدة حتى تمنح الموافقة مجدداً.",
-      consentGrantedSuccess: "تم تسجيل موافقتك بنجاح.",
-      consentWithdrawSuccess: "تم سحب موافقتك بنجاح.",
+
+      consentUpdateRequired:
+        "تم تحديث بيان الخصوصية. يلزم سحب الموافقة السابقة أولاً، ثم مراجعة البيان الجديد والموافقة عليه للمتابعة.",
+
+      consentGrantedSuccess:
+        "تم تسجيل موافقتك بنجاح.",
+
+      consentWithdrawSuccess:
+        "تم سحب موافقتك بنجاح.",
+
       consentWithdrawConfirm:
         "هل أنت متأكد من سحب الموافقة؟ لن تتمكن من إرسال طلبات دعم جديدة حتى تمنح الموافقة مرة أخرى.",
-      consentRequired: "يجب وجود موافقة سارية قبل إرسال الطلب.",
-      consentError: "تعذر تحديث الموافقة. يرجى المحاولة مرة أخرى.",
 
-      domainsTitle: "ما المجالات التي ترغب في الحصول على معلومات أو دعم بشأنها؟",
-      domainsHint: "يمكنك اختيار أكثر من مجال أو تركها دون تحديد.",
+      consentRequired:
+        "يجب وجود موافقة سارية قبل إرسال الطلب.",
+
+      consentError:
+        "تعذر تحديث الموافقة. يرجى المحاولة مرة أخرى.",
+
+      domainsTitle:
+        "ما المجالات التي ترغب في الحصول على معلومات أو دعم بشأنها؟",
+
+      domainsHint:
+        "يمكنك اختيار أكثر من مجال أو تركها دون تحديد.",
+
       dMood: "المزاج وفقدان الاهتمام",
       dAnxiety: "القلق والتوتر",
       dSleep: "النوم والإرهاق",
@@ -248,12 +351,15 @@
       dRelationships: "العلاقات والدعم الاجتماعي",
       dOther: "موضوع آخر",
 
-      helpTitle: "هل ترغب في التواصل مع مختص لتقديم الدعم؟",
+      helpTitle:
+        "هل ترغب في التواصل مع مختص لتقديم الدعم؟",
+
       yes: "نعم",
       no: "لا حالياً",
       infoOnly: "أرغب في معلومات فقط",
 
       safetyTitle: "سؤال السلامة العاجلة",
+
       safetyQuestion:
         "هل تشعر الآن أنك قد تؤذي نفسك أو شخصاً آخر، أو أنك غير قادر على الحفاظ على سلامتك؟",
 
@@ -262,23 +368,27 @@
       urgentHelp:
         "إذا كنت في خطر فوري، لا تنتظر رد التطبيق: تواصل فوراً مع خدمات الطوارئ المحلية أو أقرب قسم طوارئ، واطلب من شخص موثوق البقاء معك. هذه المنصة ليست خدمة طوارئ ولا تتم مراقبتها لحظياً.",
 
-      notesLabel: "ملاحظة اختيارية (يرجى عدم كتابة تفاصيل شديدة الحساسية)",
+      notesLabel:
+        "ملاحظة اختيارية (يرجى عدم كتابة تفاصيل شديدة الحساسية)",
+
       confirmText:
         "أؤكد أن المعلومات التي أدخلتها تعبر عن رغبتي الحالية في طلب الدعم.",
 
       submitRequest: "إرسال الطلب السري",
-      adminTitle: "لوحة الوصول المخوّل",
+
       professionalTitle: "لوحة المختص النفسي",
+
       professionalIntro:
         "تعرض هذه اللوحة طلبات الدعم المسندة إلى حسابك المهني فقط.",
+
       ownerTitle: "لوحة مالك النظام",
       ownerBadge: "مالك النظام",
+
       ownerIntro:
         "عرض مقيّد لمالك النظام لمراجعة طلبات الدعم وسجلات المنصة وفق الصلاحيات المعتمدة.",
+
       ownerPrivacyNote:
         "لا تملك الموارد البشرية أو المديرون التشغيليون صلاحية الاطلاع على سجلات الدعم النفسي الفردية.",
-      allRequests: "جميع طلبات الدعم",
-      restricted: "وصول مقيّد",
 
       refresh: "تحديث القائمة",
       date: "التاريخ",
@@ -288,13 +398,17 @@
       status: "الحالة",
 
       savedTitle: "تم استلام طلبك",
+
       savedText:
         "شكراً لك. تم حفظ طلبك. إذا طلبت التواصل، فسيتم التعامل معه وفق آلية المتابعة المعتمدة. لا تستخدم هذه المنصة في حالات الطوارئ.",
+
       backToForm: "العودة إلى النموذج",
 
-      footer: "نسخة تجريبية – لا تستخدم للتشخيص أو قرارات اللياقة",
+      footer:
+        "نسخة تجريبية – لا تستخدم للتشخيص أو قرارات اللياقة",
 
       noRequests: "لا توجد طلبات متاحة.",
+
       yesShort: "نعم",
       noShort: "لا",
       statusPreferNot: "أفضل عدم الإجابة",
@@ -307,24 +421,48 @@
       configMissing:
         "يرجى إدخال رابط مشروع Supabase والمفتاح العام في ملف supabase-config.js.",
 
-      loginError: "تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.",
+      loginError:
+        "تعذر تسجيل الدخول. تحقق من البريد الإلكتروني وكلمة المرور.",
+
       signupSent:
         "تم إنشاء الحساب. راجع بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.",
-      signupError: "تعذر إنشاء الحساب.",
+
+      signupError:
+        "تعذر إنشاء الحساب.",
+
       resetSent:
         "إذا كان البريد مسجلاً، فسيتم إرسال رابط إعادة تعيين كلمة المرور.",
-      resetError: "تعذر إرسال رسالة إعادة تعيين كلمة المرور.",
-      sessionError: "تعذر التحقق من جلسة الدخول.",
+
+      resetError:
+        "تعذر إرسال رسالة إعادة تعيين كلمة المرور.",
+
+      sessionError:
+        "تعذر التحقق من جلسة الدخول.",
+
       roleError:
         "تعذر التحقق من صلاحية حسابك. يرجى التواصل مع مسؤول النظام.",
-      adminError: "تعذر تحميل الطلبات. تحقق من الصلاحيات.",
-      professionalError: "تعذر تحميل الطلبات المسندة إليك.",
-      submitError: "تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.",
-      invalidPassword: "كلمتا المرور غير متطابقتين أو كلمة المرور قصيرة.",
-      passwordSaved: "تم تحديث كلمة المرور بنجاح.",
-      passwordError: "تعذر تحديث كلمة المرور.",
+
+      adminError:
+        "تعذر تحميل الطلبات. تحقق من الصلاحيات.",
+
+      professionalError:
+        "تعذر تحميل الطلبات المسندة إليك.",
+
+      submitError:
+        "تعذر حفظ الطلب. يرجى المحاولة مرة أخرى.",
+
+      invalidPassword:
+        "كلمتا المرور غير متطابقتين أو كلمة المرور قصيرة.",
+
+      passwordSaved:
+        "تم تحديث كلمة المرور بنجاح.",
+
+      passwordError:
+        "تعذر تحديث كلمة المرور.",
+
       accessDenied: "غير مصرح بالوصول.",
       processing: "يرجى الانتظار...",
+
       domainMood: "المزاج",
       domainAnxiety: "القلق",
       domainSleep: "النوم",
@@ -413,18 +551,31 @@
     document.querySelectorAll("[data-i18n]").forEach((element) => {
       const key = element.dataset.i18n;
 
-      if (Object.prototype.hasOwnProperty.call(translations[lang], key)) {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          translations[lang],
+          key
+        )
+      ) {
         element.textContent = t(key);
       }
     });
 
-    $("languageBtn").textContent =
-      lang === "ar" ? "English" : "العربية";
+    if ($("languageBtn")) {
+      $("languageBtn").textContent =
+        lang === "ar" ? "English" : "العربية";
+    }
 
-    $("authSubmit").textContent = t(authMode);
+    if ($("authSubmit")) {
+      $("authSubmit").textContent = t(authMode);
+    }
 
-    $("password").autocomplete =
-      authMode === "login" ? "current-password" : "new-password";
+    if ($("password")) {
+      $("password").autocomplete =
+        authMode === "login"
+          ? "current-password"
+          : "new-password";
+    }
 
     if (currentUser && currentRole === "professional") {
       loadProfessionalRequests();
@@ -442,12 +593,21 @@
   function setAuthMode(mode) {
     authMode = mode;
 
-    $("loginTab").classList.toggle("active", mode === "login");
-    $("signupTab").classList.toggle("active", mode === "signup");
+    if ($("loginTab")) {
+      $("loginTab").classList.toggle("active", mode === "login");
+    }
 
-    $("authSubmit").textContent = t(mode);
+    if ($("signupTab")) {
+      $("signupTab").classList.toggle("active", mode === "signup");
+    }
 
-    $("forgotBtn").classList.toggle("hidden", mode !== "login");
+    if ($("authSubmit")) {
+      $("authSubmit").textContent = t(mode);
+    }
+
+    if ($("forgotBtn")) {
+      $("forgotBtn").classList.toggle("hidden", mode !== "login");
+    }
 
     message("authMessage", "");
   }
@@ -489,12 +649,18 @@
 
     activeConsentVersion = null;
 
-    const isGranted = data?.action === "granted";
-
-    if (isGranted) {
+    // Current privacy version is granted
+    if (
+      data?.action === "granted" &&
+      data.consent_version === CONSENT_VERSION
+    ) {
       activeConsentVersion = data.consent_version;
 
-      message("consentStatus", t("consentActive"), "success");
+      message(
+        "consentStatus",
+        t("consentActive"),
+        "success"
+      );
 
       hide("consentForm");
       show("withdrawConsentBtn");
@@ -503,10 +669,39 @@
       return true;
     }
 
+    // Older version is still active.
+    // The user must withdraw it before accepting the new version.
+    if (
+      data?.action === "granted" &&
+      data.consent_version !== CONSENT_VERSION
+    ) {
+      activeConsentVersion = data.consent_version;
+
+      message(
+        "consentStatus",
+        t("consentUpdateRequired"),
+        "error"
+      );
+
+      hide("consentForm");
+      show("withdrawConsentBtn");
+      hide("supportForm");
+
+      return false;
+    }
+
+    // Previous consent was withdrawn
     if (data?.action === "withdrawn") {
-      message("consentStatus", t("consentWithdrawn"), "error");
+      message(
+        "consentStatus",
+        t("consentWithdrawn"),
+        "error"
+      );
     } else {
-      message("consentStatus", t("consentNotGiven"));
+      message(
+        "consentStatus",
+        t("consentNotGiven")
+      );
     }
 
     show("consentForm");
@@ -522,7 +717,11 @@
     if (!client || !currentUser) return;
 
     if (!$("consentAccept").checked) {
-      message("consentMessage", t("consentRequired"), "error");
+      message(
+        "consentMessage",
+        t("consentRequired"),
+        "error"
+      );
       return;
     }
 
@@ -530,77 +729,109 @@
 
     setBusy(button, true, t("processing"));
 
-    const { error } = await client
-      .from("omhsq_consent_records")
-      .insert({
-        user_id: currentUser.id,
-        action: "granted",
-        consent_version: CONSENT_VERSION,
-        language: lang
-      });
+    try {
+      const { error } = await client
+        .from("omhsq_consent_records")
+        .insert({
+          user_id: currentUser.id,
+          action: "granted",
+          consent_version: CONSENT_VERSION,
+          language: lang
+        });
 
-    setBusy(button, false, t("grantConsent"));
+      if (error) {
+        console.error("Consent grant error:", error);
 
-    if (error) {
-      console.error("Consent grant error:", error);
+        message(
+          "consentMessage",
+          t("consentError") + " " + error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      $("consentAccept").checked = false;
+
+      await loadConsentState();
+
       message(
         "consentMessage",
-        t("consentError") + " " + error.message,
+        t("consentGrantedSuccess"),
+        "success"
+      );
+
+    } catch (error) {
+      console.error("Consent grant exception:", error);
+
+      message(
+        "consentMessage",
+        t("consentError"),
         "error"
       );
-      return;
+
+    } finally {
+      setBusy(button, false, t("grantConsent"));
     }
-
-    $("consentAccept").checked = false;
-
-    await loadConsentState();
-
-    message(
-      "consentMessage",
-      t("consentGrantedSuccess"),
-      "success"
-    );
   }
 
   async function withdrawConsent() {
-    if (!client || !currentUser || !activeConsentVersion) return;
+    if (!client || !currentUser || !activeConsentVersion) {
+      return;
+    }
 
-    if (!window.confirm(t("consentWithdrawConfirm"))) return;
+    if (!window.confirm(t("consentWithdrawConfirm"))) {
+      return;
+    }
 
     const button = $("withdrawConsentBtn");
 
     setBusy(button, true, t("processing"));
 
-    const { error } = await client
-      .from("omhsq_consent_records")
-      .insert({
-        user_id: currentUser.id,
-        action: "withdrawn",
-        consent_version: activeConsentVersion,
-        language: lang
-      });
+    try {
+      const { error } = await client
+        .from("omhsq_consent_records")
+        .insert({
+          user_id: currentUser.id,
+          action: "withdrawn",
+          consent_version: activeConsentVersion,
+          language: lang
+        });
 
-    setBusy(button, false, t("withdrawConsent"));
+      if (error) {
+        console.error("Consent withdrawal error:", error);
 
-    if (error) {
-      console.error("Consent withdrawal error:", error);
+        message(
+          "consentMessage",
+          t("consentError") + " " + error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      activeConsentVersion = null;
+
+      await loadConsentState();
+
       message(
         "consentMessage",
-        t("consentError") + " " + error.message,
+        t("consentWithdrawSuccess"),
+        "success"
+      );
+
+    } catch (error) {
+      console.error("Consent withdrawal exception:", error);
+
+      message(
+        "consentMessage",
+        t("consentError"),
         "error"
       );
-      return;
+
+    } finally {
+      setBusy(button, false, t("withdrawConsent"));
     }
-
-    activeConsentVersion = null;
-
-    await loadConsentState();
-
-    message(
-      "consentMessage",
-      t("consentWithdrawSuccess"),
-      "success"
-    );
   }
 
   // =========================================================
@@ -610,8 +841,13 @@
   async function showWorkerView() {
     show("workerPanel");
 
-    $("supportForm").reset();
-    $("consentForm").reset();
+    if ($("supportForm")) {
+      $("supportForm").reset();
+    }
+
+    if ($("consentForm")) {
+      $("consentForm").reset();
+    }
 
     message("formMessage", "");
     message("consentMessage", "");
@@ -625,13 +861,22 @@
     if (!client || !currentUser) return;
 
     if (!activeConsentVersion) {
-      message("formMessage", t("consentRequired"), "error");
+      message(
+        "formMessage",
+        t("consentRequired"),
+        "error"
+      );
+
       await loadConsentState();
       return;
     }
 
     if (!$("confirmAccuracy").checked) {
-      message("formMessage", t("submitError"), "error");
+      message(
+        "formMessage",
+        t("submitError"),
+        "error"
+      );
       return;
     }
 
@@ -650,7 +895,11 @@
     )?.value;
 
     if (!helpRequest || !urgentSafety) {
-      message("formMessage", t("submitError"), "error");
+      message(
+        "formMessage",
+        t("submitError"),
+        "error"
+      );
       return;
     }
 
@@ -670,28 +919,40 @@
 
     setBusy(button, true, t("processing"));
 
-    const { error } = await client
-      .from("omhsq_support_requests")
-      .insert(payload);
+    try {
+      const { error } = await client
+        .from("omhsq_support_requests")
+        .insert(payload);
 
-    setBusy(button, false, t("submitRequest"));
+      if (error) {
+        console.error("Support request error:", error);
 
-    if (error) {
-      console.error("Support request error:", error);
+        message(
+          "formMessage",
+          t("submitError") + " " + error.message,
+          "error"
+        );
+
+        return;
+      }
+
+      $("supportForm").reset();
+
+      hide("workerPanel");
+      show("confirmationPanel");
+
+    } catch (error) {
+      console.error("Support request exception:", error);
 
       message(
         "formMessage",
-        t("submitError") + " " + error.message,
+        t("submitError"),
         "error"
       );
 
-      return;
+    } finally {
+      setBusy(button, false, t("submitRequest"));
     }
-
-    $("supportForm").reset();
-
-    hide("workerPanel");
-    show("confirmationPanel");
   }
 
   // =========================================================
@@ -772,50 +1033,71 @@
 
     message("professionalMessage", "");
 
-    const { data: assignments, error: assignmentError } =
-      await client
-        .from("omhsq_professional_assignments")
-        .select("request_id")
-        .eq("professional_id", currentUser.id);
+    try {
+      const { data: assignments, error: assignmentError } =
+        await client
+          .from("omhsq_professional_assignments")
+          .select("request_id")
+          .eq("professional_id", currentUser.id);
 
-    if (assignmentError) {
-      console.error("Assignment read error:", assignmentError);
+      if (assignmentError) {
+        console.error(
+          "Assignment read error:",
+          assignmentError
+        );
+
+        message(
+          "professionalMessage",
+          t("professionalError"),
+          "error"
+        );
+
+        return;
+      }
+
+      const requestIds = (assignments || [])
+        .map((item) => item.request_id)
+        .filter(Boolean);
+
+      if (requestIds.length === 0) {
+        renderRequests("professionalRows", []);
+        return;
+      }
+
+      const { data, error } = await client
+        .from("omhsq_support_requests")
+        .select(
+          "id, created_at, help_request, domains, urgent_safety, status"
+        )
+        .in("id", requestIds)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(
+          "Professional request read error:",
+          error
+        );
+
+        message(
+          "professionalMessage",
+          t("professionalError"),
+          "error"
+        );
+
+        return;
+      }
+
+      renderRequests("professionalRows", data || []);
+
+    } catch (error) {
+      console.error("Professional dashboard error:", error);
+
       message(
         "professionalMessage",
         t("professionalError"),
         "error"
       );
-      return;
     }
-
-    const requestIds = (assignments || [])
-      .map((item) => item.request_id)
-      .filter(Boolean);
-
-    if (requestIds.length === 0) {
-      renderRequests("professionalRows", []);
-      return;
-    }
-
-    const { data, error } = await client
-      .from("omhsq_support_requests")
-      .select(
-        "id, created_at, help_request, domains, urgent_safety, status"
-      )
-      .in("id", requestIds)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Professional request read error:", error);
-      message(
-        "professionalMessage",
-        t("professionalError"),
-        "error"
-      );
-      return;
-    }
-
-    renderRequests("professionalRows", data || []);
   }
 
   // =========================================================
@@ -833,21 +1115,38 @@
 
     message("ownerMessage", "");
 
-    const { data, error } = await client
-      .from("omhsq_support_requests")
-      .select(
-        "id, created_at, help_request, domains, urgent_safety, status"
-      )
-      .order("created_at", { ascending: false })
-      .limit(200);
+    try {
+      const { data, error } = await client
+        .from("omhsq_support_requests")
+        .select(
+          "id, created_at, help_request, domains, urgent_safety, status"
+        )
+        .order("created_at", { ascending: false })
+        .limit(200);
 
-    if (error) {
-      console.error("Owner request read error:", error);
-      message("ownerMessage", t("adminError"), "error");
-      return;
+      if (error) {
+        console.error("Owner request read error:", error);
+
+        message(
+          "ownerMessage",
+          t("adminError"),
+          "error"
+        );
+
+        return;
+      }
+
+      renderRequests("ownerRows", data || []);
+
+    } catch (error) {
+      console.error("Owner dashboard error:", error);
+
+      message(
+        "ownerMessage",
+        t("adminError"),
+        "error"
+      );
     }
-
-    renderRequests("ownerRows", data || []);
   }
 
   // =========================================================
@@ -864,7 +1163,13 @@
         hideAllPanels();
         show("authPanel");
         hide("logoutBtn");
-        message("authMessage", t("configMissing"), "error");
+
+        message(
+          "authMessage",
+          t("configMissing"),
+          "error"
+        );
+
         return;
       }
 
@@ -873,7 +1178,13 @@
       if (error) {
         hideAllPanels();
         show("authPanel");
-        message("authMessage", t("sessionError"), "error");
+
+        message(
+          "authMessage",
+          t("sessionError"),
+          "error"
+        );
+
         return;
       }
 
@@ -899,12 +1210,19 @@
         .maybeSingle();
 
       if (roleError || !roleRow?.role) {
-        console.error("Role verification error:", roleError);
+        console.error(
+          "Role verification error:",
+          roleError
+        );
 
         hideAllPanels();
         show("authPanel");
 
-        message("authMessage", t("roleError"), "error");
+        message(
+          "authMessage",
+          t("roleError"),
+          "error"
+        );
 
         return;
       }
@@ -930,7 +1248,11 @@
         hide("logoutBtn");
         show("authPanel");
 
-        message("authMessage", t("accessDenied"), "error");
+        message(
+          "authMessage",
+          t("accessDenied"),
+          "error"
+        );
       }
 
     } catch (error) {
@@ -939,7 +1261,11 @@
       hideAllPanels();
       show("authPanel");
 
-      message("authMessage", t("sessionError"), "error");
+      message(
+        "authMessage",
+        t("sessionError"),
+        "error"
+      );
 
     } finally {
       loading = false;
@@ -947,14 +1273,18 @@
   }
 
   // =========================================================
-  // 11. AUTH FORM
+  // 11. AUTHENTICATION FORM
   // =========================================================
 
   async function handleAuthentication(event) {
     event.preventDefault();
 
     if (!client) {
-      message("authMessage", t("configMissing"), "error");
+      message(
+        "authMessage",
+        t("configMissing"),
+        "error"
+      );
       return;
     }
 
@@ -971,7 +1301,8 @@
           email,
           password,
           options: {
-            emailRedirectTo: `${location.origin}${location.pathname}`
+            emailRedirectTo:
+              `${location.origin}${location.pathname}`
           }
         });
 
@@ -987,7 +1318,11 @@
           await refreshView();
 
         } else {
-          message("authMessage", t("signupSent"), "success");
+          message(
+            "authMessage",
+            t("signupSent"),
+            "success"
+          );
         }
 
       } else {
@@ -997,7 +1332,12 @@
         });
 
         if (error) {
-          message("authMessage", t("loginError"), "error");
+          message(
+            "authMessage",
+            t("loginError"),
+            "error"
+          );
+
         } else {
           message("authMessage", "");
           await refreshView();
@@ -1006,7 +1346,12 @@
 
     } catch (error) {
       console.error("Authentication error:", error);
-      message("authMessage", t("loginError"), "error");
+
+      message(
+        "authMessage",
+        t("loginError"),
+        "error"
+      );
 
     } finally {
       setBusy(button, false, t(authMode));
@@ -1014,12 +1359,16 @@
   }
 
   // =========================================================
-  // 12. PASSWORD RESET
+  // 12. PASSWORD RESET EMAIL
   // =========================================================
 
   async function sendPasswordReset() {
     if (!client) {
-      message("authMessage", t("configMissing"), "error");
+      message(
+        "authMessage",
+        t("configMissing"),
+        "error"
+      );
       return;
     }
 
@@ -1033,6 +1382,7 @@
           : "Enter your email address first.",
         "error"
       );
+
       return;
     }
 
@@ -1041,12 +1391,14 @@
     button.disabled = true;
 
     try {
-      const { error } = await client.auth.resetPasswordForEmail(
-        email,
-        {
-          redirectTo: `${location.origin}${location.pathname}`
-        }
-      );
+      const { error } =
+        await client.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo:
+              `${location.origin}${location.pathname}`
+          }
+        );
 
       message(
         "authMessage",
@@ -1056,7 +1408,12 @@
 
     } catch (error) {
       console.error("Password reset error:", error);
-      message("authMessage", t("resetError"), "error");
+
+      message(
+        "authMessage",
+        t("resetError"),
+        "error"
+      );
 
     } finally {
       button.disabled = false;
@@ -1064,7 +1421,7 @@
   }
 
   // =========================================================
-  // 13. RECOVERY PASSWORD FORM
+  // 13. PASSWORD RECOVERY FORM
   // =========================================================
 
   async function handleRecovery(event) {
@@ -1075,8 +1432,16 @@
     const password = $("newPassword").value;
     const confirmation = $("confirmNewPassword").value;
 
-    if (password.length < 8 || password !== confirmation) {
-      message("recoveryMessage", t("invalidPassword"), "error");
+    if (
+      password.length < 8 ||
+      password !== confirmation
+    ) {
+      message(
+        "recoveryMessage",
+        t("invalidPassword"),
+        "error"
+      );
+
       return;
     }
 
@@ -1092,7 +1457,12 @@
       if (error) {
         console.error("Password update error:", error);
 
-        message("recoveryMessage", t("passwordError"), "error");
+        message(
+          "recoveryMessage",
+          t("passwordError"),
+          "error"
+        );
+
         return;
       }
 
@@ -1100,7 +1470,11 @@
 
       $("recoveryForm").reset();
 
-      message("recoveryMessage", t("passwordSaved"), "success");
+      message(
+        "recoveryMessage",
+        t("passwordSaved"),
+        "success"
+      );
 
       await client.auth.signOut();
 
@@ -1110,11 +1484,20 @@
       hideAllPanels();
       show("authPanel");
 
-      message("authMessage", t("passwordSaved"), "success");
+      message(
+        "authMessage",
+        t("passwordSaved"),
+        "success"
+      );
 
     } catch (error) {
       console.error("Recovery error:", error);
-      message("recoveryMessage", t("passwordError"), "error");
+
+      message(
+        "recoveryMessage",
+        t("passwordError"),
+        "error"
+      );
 
     } finally {
       setBusy(button, false, t("savePassword"));
@@ -1205,11 +1588,14 @@
     loadOwnerRequests
   );
 
-  $("backToWorker").addEventListener("click", async () => {
-    hide("confirmationPanel");
-    show("workerPanel");
-    await loadConsentState();
-  });
+  $("backToWorker").addEventListener(
+    "click",
+    async () => {
+      hide("confirmationPanel");
+      show("workerPanel");
+      await loadConsentState();
+    }
+  );
 
   // =========================================================
   // 16. SUPABASE AUTH STATE CHANGES
@@ -1234,7 +1620,10 @@
         activeConsentVersion = null;
       }
 
-      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+      if (
+        event === "SIGNED_IN" ||
+        event === "INITIAL_SESSION"
+      ) {
         if (!recoveryMode) {
           setTimeout(() => {
             refreshView();
