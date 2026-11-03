@@ -263,7 +263,12 @@
       domainStress: "Work and life pressures",
       domainTrauma: "Trauma",
       domainRelationships: "Relationships",
-      domainOther: "Other"
+      domainOther: "Other",
+
+      identityLabel: "Current account",
+      roleOwner: "System Owner — Super Admin",
+      roleProfessional: "Mental Health Professional",
+      roleWorker: "Worker"
     },
 
     ar: {
@@ -469,7 +474,12 @@
       domainStress: "ضغوط العمل والحياة",
       domainTrauma: "التجارب الصادمة",
       domainRelationships: "العلاقات",
-      domainOther: "موضوع آخر"
+      domainOther: "موضوع آخر",
+
+      identityLabel: "الحساب الحالي",
+      roleOwner: "مالك النظام — Super Admin",
+      roleProfessional: "المختص النفسي — Professional",
+      roleWorker: "العامل — Worker"
     }
   };
 
@@ -544,8 +554,8 @@
     return keys[value] ? t(keys[value]) : (value || "—");
   }
 
-    // =========================================================
-  // USER IDENTITY DISPLAY
+  // =========================================================
+  // 3A. USER IDENTITY DISPLAY
   // =========================================================
 
   function updateUserIdentity(user, role) {
@@ -554,49 +564,49 @@
     const roleElement = $("currentUserRole");
     const labelElement = $("identityLabel");
 
+    // If the identity elements are not present in HTML,
+    // do not interrupt the rest of the application.
     if (!identityBox || !emailElement || !roleElement) {
       return;
     }
 
+    // Hide identity information when no verified session/role exists.
     if (!user || !role) {
       identityBox.classList.add("hidden");
       emailElement.textContent = "";
       roleElement.textContent = "";
+
+      if (labelElement) {
+        labelElement.textContent = t("identityLabel");
+      }
+
       return;
     }
 
-    const metadata = user.user_metadata || {};
-
-    const displayName =
-      metadata.full_name ||
-      metadata.name ||
-      metadata.display_name ||
-      user.email ||
-      "";
-
     const roleLabels = {
-      super_admin:
-        lang === "ar" ? "مالك النظام — Super Admin" : "System Owner — Super Admin",
-
-      professional:
-        lang === "ar" ? "المختص النفسي — Professional" : "Mental Health Professional",
-
-      worker:
-        lang === "ar" ? "العامل — Worker" : "Worker"
+      super_admin: t("roleOwner"),
+      professional: t("roleProfessional"),
+      worker: t("roleWorker")
     };
 
-    if (labelElement) {
-      labelElement.textContent =
-        lang === "ar" ? "الحساب الحالي" : "Current account";
-    }
+    // Display the actual authenticated email address.
+    // Do not substitute a display name for the email.
+    emailElement.textContent = user.email || "";
 
-    emailElement.textContent = displayName;
     roleElement.textContent =
       roleLabels[role] || role;
 
+    if (labelElement) {
+      labelElement.textContent = t("identityLabel");
+    }
+
     identityBox.classList.remove("hidden");
   }
-  
+
+  function clearUserIdentity() {
+    updateUserIdentity(null, null);
+  }
+
   function applyLanguage() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
@@ -628,6 +638,11 @@
         authMode === "login"
           ? "current-password"
           : "new-password";
+    }
+
+    // Refresh the displayed account information after language change.
+    if (currentUser && currentRole) {
+      updateUserIdentity(currentUser, currentRole);
     }
 
     if (currentUser && currentRole === "professional") {
@@ -702,7 +717,7 @@
 
     activeConsentVersion = null;
 
-    // Current privacy version is granted
+    // Current privacy version is granted.
     if (
       data?.action === "granted" &&
       data.consent_version === CONSENT_VERSION
@@ -743,7 +758,7 @@
       return false;
     }
 
-    // Previous consent was withdrawn
+    // Previous consent was withdrawn.
     if (data?.action === "withdrawn") {
       message(
         "consentStatus",
@@ -1213,6 +1228,11 @@
 
     try {
       if (!client) {
+        currentUser = null;
+        currentRole = null;
+
+        clearUserIdentity();
+
         hideAllPanels();
         show("authPanel");
         hide("logoutBtn");
@@ -1229,6 +1249,11 @@
       const { data, error } = await client.auth.getSession();
 
       if (error) {
+        currentUser = null;
+        currentRole = null;
+
+        clearUserIdentity();
+
         hideAllPanels();
         show("authPanel");
 
@@ -1243,9 +1268,12 @@
 
       currentUser = data.session?.user || null;
 
+      // No authenticated user.
       if (!currentUser) {
         currentRole = null;
         activeConsentVersion = null;
+
+        clearUserIdentity();
 
         hideAllPanels();
         show("authPanel");
@@ -1256,6 +1284,7 @@
 
       show("logoutBtn");
 
+      // Verify the role directly from Supabase.
       const { data: roleRow, error: roleError } = await client
         .from("omhsq_user_roles")
         .select("role")
@@ -1267,6 +1296,9 @@
           "Role verification error:",
           roleError
         );
+
+        currentRole = null;
+        clearUserIdentity();
 
         hideAllPanels();
         show("authPanel");
@@ -1281,6 +1313,9 @@
       }
 
       currentRole = roleRow.role;
+
+      // Display authenticated email and verified role.
+      updateUserIdentity(currentUser, currentRole);
 
       hideAllPanels();
 
@@ -1297,6 +1332,7 @@
 
       } else {
         currentRole = null;
+        clearUserIdentity();
 
         hide("logoutBtn");
         show("authPanel");
@@ -1310,6 +1346,9 @@
 
     } catch (error) {
       console.error("View refresh error:", error);
+
+      currentRole = null;
+      clearUserIdentity();
 
       hideAllPanels();
       show("authPanel");
@@ -1533,6 +1572,9 @@
 
       currentUser = null;
       currentRole = null;
+      activeConsentVersion = null;
+
+      clearUserIdentity();
 
       hideAllPanels();
       show("authPanel");
@@ -1576,6 +1618,8 @@
     activeConsentVersion = null;
     recoveryMode = false;
 
+    clearUserIdentity();
+
     await refreshView();
   }
 
@@ -1583,72 +1627,98 @@
   // 15. EVENT LISTENERS
   // =========================================================
 
-  $("languageBtn").addEventListener("click", () => {
-    lang = lang === "ar" ? "en" : "ar";
-    applyLanguage();
-  });
+  if ($("languageBtn")) {
+    $("languageBtn").addEventListener("click", () => {
+      lang = lang === "ar" ? "en" : "ar";
+      applyLanguage();
+    });
+  }
 
-  $("loginTab").addEventListener("click", () => {
-    setAuthMode("login");
-  });
+  if ($("loginTab")) {
+    $("loginTab").addEventListener("click", () => {
+      setAuthMode("login");
+    });
+  }
 
-  $("signupTab").addEventListener("click", () => {
-    setAuthMode("signup");
-  });
+  if ($("signupTab")) {
+    $("signupTab").addEventListener("click", () => {
+      setAuthMode("signup");
+    });
+  }
 
-  $("authForm").addEventListener(
-    "submit",
-    handleAuthentication
-  );
+  if ($("authForm")) {
+    $("authForm").addEventListener(
+      "submit",
+      handleAuthentication
+    );
+  }
 
-  $("forgotBtn").addEventListener(
-    "click",
-    sendPasswordReset
-  );
+  if ($("forgotBtn")) {
+    $("forgotBtn").addEventListener(
+      "click",
+      sendPasswordReset
+    );
+  }
 
-  $("recoveryForm").addEventListener(
-    "submit",
-    handleRecovery
-  );
+  if ($("recoveryForm")) {
+    $("recoveryForm").addEventListener(
+      "submit",
+      handleRecovery
+    );
+  }
 
-  $("logoutBtn").addEventListener(
-    "click",
-    logout
-  );
+  if ($("logoutBtn")) {
+    $("logoutBtn").addEventListener(
+      "click",
+      logout
+    );
+  }
 
-  $("consentForm").addEventListener(
-    "submit",
-    grantConsent
-  );
+  if ($("consentForm")) {
+    $("consentForm").addEventListener(
+      "submit",
+      grantConsent
+    );
+  }
 
-  $("withdrawConsentBtn").addEventListener(
-    "click",
-    withdrawConsent
-  );
+  if ($("withdrawConsentBtn")) {
+    $("withdrawConsentBtn").addEventListener(
+      "click",
+      withdrawConsent
+    );
+  }
 
-  $("supportForm").addEventListener(
-    "submit",
-    submitSupportRequest
-  );
+  if ($("supportForm")) {
+    $("supportForm").addEventListener(
+      "submit",
+      submitSupportRequest
+    );
+  }
 
-  $("refreshProfessional").addEventListener(
-    "click",
-    loadProfessionalRequests
-  );
+  if ($("refreshProfessional")) {
+    $("refreshProfessional").addEventListener(
+      "click",
+      loadProfessionalRequests
+    );
+  }
 
-  $("refreshOwner").addEventListener(
-    "click",
-    loadOwnerRequests
-  );
+  if ($("refreshOwner")) {
+    $("refreshOwner").addEventListener(
+      "click",
+      loadOwnerRequests
+    );
+  }
 
-  $("backToWorker").addEventListener(
-    "click",
-    async () => {
-      hide("confirmationPanel");
-      show("workerPanel");
-      await loadConsentState();
-    }
-  );
+  if ($("backToWorker")) {
+    $("backToWorker").addEventListener(
+      "click",
+      async () => {
+        hide("confirmationPanel");
+        show("workerPanel");
+        await loadConsentState();
+      }
+    );
+  }
 
   // =========================================================
   // 16. SUPABASE AUTH STATE CHANGES
@@ -1671,6 +1741,12 @@
         currentUser = null;
         currentRole = null;
         activeConsentVersion = null;
+
+        clearUserIdentity();
+
+        hideAllPanels();
+        show("authPanel");
+        hide("logoutBtn");
       }
 
       if (
@@ -1678,6 +1754,8 @@
         event === "INITIAL_SESSION"
       ) {
         if (!recoveryMode) {
+          // Let Supabase finish the auth event before querying
+          // the session and the user's database role.
           setTimeout(() => {
             refreshView();
           }, 0);
@@ -1692,6 +1770,7 @@
 
   applyLanguage();
   setAuthMode("login");
+  clearUserIdentity();
   refreshView();
 
 })();
