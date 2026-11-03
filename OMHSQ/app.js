@@ -544,6 +544,59 @@
     return keys[value] ? t(keys[value]) : (value || "—");
   }
 
+    // =========================================================
+  // USER IDENTITY DISPLAY
+  // =========================================================
+
+  function updateUserIdentity(user, role) {
+    const identityBox = $("userIdentity");
+    const emailElement = $("currentUserEmail");
+    const roleElement = $("currentUserRole");
+    const labelElement = $("identityLabel");
+
+    if (!identityBox || !emailElement || !roleElement) {
+      return;
+    }
+
+    if (!user || !role) {
+      identityBox.classList.add("hidden");
+      emailElement.textContent = "";
+      roleElement.textContent = "";
+      return;
+    }
+
+    const metadata = user.user_metadata || {};
+
+    const displayName =
+      metadata.full_name ||
+      metadata.name ||
+      metadata.display_name ||
+      user.email ||
+      "";
+
+    const roleLabels = {
+      super_admin:
+        lang === "ar" ? "مالك النظام — Super Admin" : "System Owner — Super Admin",
+
+      professional:
+        lang === "ar" ? "المختص النفسي — Professional" : "Mental Health Professional",
+
+      worker:
+        lang === "ar" ? "العامل — Worker" : "Worker"
+    };
+
+    if (labelElement) {
+      labelElement.textContent =
+        lang === "ar" ? "الحساب الحالي" : "Current account";
+    }
+
+    emailElement.textContent = displayName;
+    roleElement.textContent =
+      roleLabels[role] || role;
+
+    identityBox.classList.remove("hidden");
+  }
+  
   function applyLanguage() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
