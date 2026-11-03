@@ -487,3 +487,55 @@ html[dir="ltr"] .brand {
     transition-duration: .01ms !important;
   }
 }
+/* OMHSQ - Current User Identity */
+
+.user-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  margin-inline-end: 10px;
+  border: 1px solid #d7e3e5;
+  border-radius: 10px;
+  background: #f4f8f8;
+  color: #244b52;
+  direction: rtl;
+  text-align: right;
+  min-width: 170px;
+  max-width: 260px;
+}
+
+.user-identity span {
+  font-size: 11px;
+  color: #667d81;
+}
+
+.user-identity strong {
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.user-identity small {
+  font-size: 11px;
+  color: #315c68;
+  font-weight: 600;
+}
+
+.user-identity.hidden {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  .user-identity {
+    min-width: 130px;
+    max-width: 180px;
+    padding: 6px 8px;
+  }
+
+  .user-identity strong {
+    font-size: 11px;
+  }
+}
