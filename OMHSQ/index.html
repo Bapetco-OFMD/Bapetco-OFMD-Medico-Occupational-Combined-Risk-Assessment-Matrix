@@ -32,8 +32,7 @@
   <strong id="currentUserEmail"></strong>
   <small id="currentUserRole"></small>
 </div>
-      English
-    </button>
+      <button id="languageBtn" class="btn btn-ghost" type="button" aria-label="Change language">English</button>
     <button id="logoutBtn" class="btn btn-ghost hidden"
       type="button" data-i18n="logout">
       تسجيل الخروج
@@ -147,6 +146,68 @@
       يمكنك استخدام هذه المنصة لطلب المعلومات أو الدعم النفسي المهني.
     </p>
 
+
+    <!-- Worker profile: required before consent and support -->
+    <section id="profilePanel" class="privacy-box">
+      <div class="section-heading">
+        <div>
+          <h3 data-i18n="profileTitle">الملف الوظيفي الأساسي</h3>
+          <p class="muted small" data-i18n="profileIntro">يُستكمل مرة واحدة عند الاستخدام الأول، ويمكن تحديثه لاحقاً.</p>
+        </div>
+        <span class="status-pill" data-i18n="profilePrivate">بيانات مقيدة</span>
+      </div>
+
+      <div id="profileSummary" class="profile-summary hidden">
+        <div class="profile-grid">
+          <div><span data-i18n="fullName">الاسم الكامل</span><strong id="profileViewName">—</strong></div>
+          <div><span data-i18n="dob">تاريخ الميلاد</span><strong id="profileViewDob">—</strong></div>
+          <div><span data-i18n="age">العمر</span><strong id="profileViewAge">—</strong></div>
+          <div><span data-i18n="company">اسم الشركة</span><strong id="profileViewCompany">—</strong></div>
+          <div><span data-i18n="sector">القطاع</span><strong id="profileViewSector">—</strong></div>
+          <div><span data-i18n="jobTitle">المسمى الوظيفي</span><strong id="profileViewJob">—</strong></div>
+          <div><span data-i18n="jobCode">الكود الوظيفي الداخلي</span><strong id="profileViewCode">—</strong></div>
+        </div>
+        <button id="editProfileBtn" class="btn btn-secondary" type="button" data-i18n="editProfile">تعديل الملف الشخصي</button>
+      </div>
+
+      <form id="profileForm" class="hidden">
+        <label for="profileFullName" data-i18n="fullName">الاسم الكامل</label>
+        <input id="profileFullName" type="text" maxlength="150" autocomplete="name" required>
+
+        <div class="profile-grid profile-form-grid">
+          <div>
+            <label for="profileDob" data-i18n="dob">تاريخ الميلاد</label>
+            <input id="profileDob" type="date" required>
+          </div>
+          <div>
+            <label for="profileAge" data-i18n="age">العمر (يُحسب تلقائياً)</label>
+            <input id="profileAge" type="text" readonly aria-readonly="true" placeholder="—">
+          </div>
+        </div>
+
+        <label for="profileCompany" data-i18n="company">اسم الشركة</label>
+        <input id="profileCompany" type="text" maxlength="150" required>
+
+        <label for="profileSector" data-i18n="sector">القطاع</label>
+        <select id="profileSector" required>
+          <option value="" data-i18n="selectSector">اختر القطاع</option>
+        </select>
+
+        <label for="profileJobTitle" data-i18n="jobTitle">المسمى الوظيفي</label>
+        <select id="profileJobTitle" required disabled>
+          <option value="" data-i18n="selectJob">اختر المسمى الوظيفي</option>
+        </select>
+
+        <label for="profileJobCode" data-i18n="jobCode">الكود الوظيفي الداخلي</label>
+        <input id="profileJobCode" type="text" readonly aria-readonly="true" placeholder="—">
+
+        <p class="muted small" data-i18n="profileCodeNote">الأكواد المقترحة أكواد داخلية تنظيمية للمنصة وليست أكواداً رسمية للشركة.</p>
+        <button id="saveProfileBtn" class="btn btn-primary" type="submit" data-i18n="saveProfile">حفظ الملف الشخصي</button>
+        <button id="cancelProfileEditBtn" class="btn btn-ghost hidden" type="button" data-i18n="cancelEdit">إلغاء التعديل</button>
+        <p id="profileMessage" class="message" aria-live="polite"></p>
+      </form>
+      <p class="muted small" data-i18n="profileAccessNote">يمكن للعامل الاطلاع على ملفه وتعديله، ويستطيع مالك النظام الاطلاع عليه لأغراض إدارة المنصة. لا يستطيع المختص النفسي الاطلاع على بيانات الملف الوظيفي.</p>
+    </section>
 
     <!-- Privacy and consent -->
     <section id="consentPanel" class="privacy-box">
@@ -401,6 +462,21 @@
 
     <p id="ownerMessage" class="message"
       aria-live="polite"></p>
+
+    <h3 data-i18n="workerProfilesTitle">الملفات الوظيفية للعاملين</h3>
+    <p class="muted small" data-i18n="workerProfilesNote">بيانات الملف الوظيفي متاحة لمالك النظام فقط، ولا تظهر للمختصين.</p>
+    <div class="table-wrap">
+      <table class="profile-table">
+        <thead><tr>
+          <th data-i18n="fullName">الاسم الكامل</th><th data-i18n="dob">تاريخ الميلاد</th>
+          <th data-i18n="age">العمر</th><th data-i18n="company">الشركة</th>
+          <th data-i18n="sector">القطاع</th><th data-i18n="jobTitle">المسمى الوظيفي</th>
+          <th data-i18n="jobCode">الكود الداخلي</th>
+        </tr></thead>
+        <tbody id="ownerProfileRows"></tbody>
+      </table>
+    </div>
+    <p id="ownerProfileMessage" class="message" aria-live="polite"></p>
 
     <h3 data-i18n="allRequests">جميع طلبات الدعم</h3>
 

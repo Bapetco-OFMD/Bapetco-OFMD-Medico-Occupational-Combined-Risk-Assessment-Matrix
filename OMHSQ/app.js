@@ -21,7 +21,7 @@
 
   const $ = (id) => document.getElementById(id);
 
-  const CONSENT_VERSION = "OMHSQ-PRIVACY-1.0";
+  const CONSENT_VERSION = "OMHSQ-PRIVACY-1.1";
 
   const config = window.OMHSQ_CONFIG || {};
 
@@ -54,6 +54,7 @@
   let activeConsentVersion = null;
   let recoveryMode = false;
   let loading = false;
+  let currentWorkerProfile = null;
 
   // =========================================================
   // 2. TRANSLATIONS
@@ -96,7 +97,7 @@
       privacyTitle: "Consent and privacy",
 
       privacyText:
-        "Your information is stored in a restricted-access database. Authorized mental health professionals can access only the support requests assigned to them. The System Owner has elevated administrative access to records for platform governance, administration and security oversight. Administrative changes to records are recorded in the audit log. HR and operational managers have no access to individual support requests and must not use this information for recruitment, promotion or medical fitness decisions. Confidentiality may be subject to limited exceptions where there is an imminent risk to your safety or someone else's, in accordance with applicable medical and legal procedures.",
+        "Your occupational profile (including date of birth, company and job details) is visible to you and the System Owner only for platform administration. Mental health professionals cannot access your occupational profile; they can access only support requests assigned to them. HR and operational managers have no access to individual support requests or occupational profiles. This information must not be used for recruitment, promotion or medical fitness decisions. Administrative changes to records are recorded in the audit log. Confidentiality may be subject to limited exceptions where there is an imminent risk to your safety or someone else's, in accordance with applicable medical and legal procedures.",
 
       consentText:
         "I voluntarily agree to participate and allow my information to be stored for contact and support purposes after reading the privacy statement.",
@@ -265,6 +266,44 @@
       domainRelationships: "Relationships",
       domainOther: "Other",
 
+      profileTitle: "Worker occupational profile",
+      profileIntro: "Complete this once on first use. You can update it later.",
+      profilePrivate: "Restricted data",
+      fullName: "Full name",
+      dob: "Date of birth",
+      age: "Age (calculated automatically)",
+      company: "Company name",
+      sector: "Sector",
+      jobTitle: "Job title",
+      jobCode: "Internal job code",
+      selectSector: "Select a sector",
+      selectJob: "Select a job title",
+      profileCodeNote: "These are proposed internal platform codes, not official company codes.",
+      profileAccessNote: "Workers can view and edit their own profile. The System Owner can view it for platform administration. Professionals cannot access occupational profile data.",
+      editProfile: "Edit profile",
+      saveProfile: "Save profile",
+      cancelEdit: "Cancel editing",
+      profileSaved: "Your occupational profile has been saved.",
+      profileLoadError: "Unable to load your profile. Please try again or contact the System Owner.",
+      profileSaveError: "Unable to save your profile. Please check the information and try again.",
+      profileRequired: "Please complete and save your occupational profile before continuing.",
+      invalidDob: "Please enter a valid date of birth.",
+      workerProfilesTitle: "Worker occupational profiles",
+      workerProfilesNote: "Full occupational profile details are visible to the System Owner only, not to professionals.",
+      noProfiles: "No worker profiles have been registered yet.",
+      ownerProfilesError: "Unable to load worker profiles. Check the System Owner permissions.",
+      sectorExploration: "Exploration & Geosciences",
+      sectorDrilling: "Drilling Operations",
+      sectorWellServices: "Well Services",
+      sectorProduction: "Production Operations",
+      sectorRefining: "Refining & Petrochemicals",
+      sectorMaintenance: "Maintenance & Engineering",
+      sectorLogistics: "Lifting & Logistics",
+      sectorOffshore: "Offshore & Marine",
+      sectorHse: "HSE & Emergency",
+      sectorSecurity: "Security",
+      sectorCorporate: "Corporate Functions",
+      sectorMedical: "Medical & Camp Services",
       identityLabel: "Current account",
       roleOwner: "System Owner — Super Admin",
       roleProfessional: "Mental Health Professional",
@@ -307,7 +346,7 @@
       privacyTitle: "الموافقة والخصوصية",
 
       privacyText:
-        "تُحفظ بياناتك في قاعدة بيانات مقيّدة الوصول. يستطيع المختص النفسي المخوّل الاطلاع على طلبات الدعم المسندة إليه فقط، بينما يمتلك مالك النظام صلاحية إدارية عليا تتيح له الاطلاع على السجلات لأغراض إدارة المنصة وحوكمتها ومراجعة أمنها، وتُسجّل التغييرات الإدارية على السجلات وفق سجل التدقيق. لا تملك إدارة الموارد البشرية أو المديرون التشغيليون صلاحية الاطلاع على طلبات الدعم الفردية أو استخدامها في قرارات التوظيف أو الترقية أو اللياقة الطبية. وقد تُطبق استثناءات السرية عند وجود خطر وشيك على سلامتك أو سلامة الآخرين، وفق الإجراءات الطبية والقانونية المعمول بها.",
+        "يظهر ملفك الوظيفي (بما يشمل تاريخ الميلاد واسم الشركة والقطاع والمسمى الوظيفي) لك ولمالك النظام فقط لأغراض إدارة المنصة. لا يستطيع المختص النفسي الاطلاع على ملفك الوظيفي، ويقتصر وصوله على طلبات الدعم المسندة إليه. لا تملك الموارد البشرية أو الإدارات التشغيلية صلاحية الاطلاع على الملفات الوظيفية أو طلبات الدعم الفردية. لا يجوز استخدام هذه المعلومات في قرارات التوظيف أو الترقية أو اللياقة الطبية. تُسجّل التغييرات الإدارية على السجلات وفق سجل التدقيق. وقد تُطبق استثناءات السرية عند وجود خطر وشيك على سلامتك أو سلامة الآخرين وفق الإجراءات الطبية والقانونية المعمول بها.",
 
       consentText:
         "أوافق طوعياً على المشاركة وحفظ المعلومات لغرض التواصل وتقديم الدعم، بعد قراءة بيان الخصوصية.",
@@ -476,6 +515,44 @@
       domainRelationships: "العلاقات",
       domainOther: "موضوع آخر",
 
+      profileTitle: "الملف الوظيفي الأساسي",
+      profileIntro: "يُستكمل مرة واحدة عند الاستخدام الأول، ويمكن تحديثه لاحقاً.",
+      profilePrivate: "بيانات مقيدة",
+      fullName: "الاسم الكامل",
+      dob: "تاريخ الميلاد",
+      age: "العمر (يُحسب تلقائياً)",
+      company: "اسم الشركة",
+      sector: "القطاع",
+      jobTitle: "المسمى الوظيفي",
+      jobCode: "الكود الوظيفي الداخلي",
+      selectSector: "اختر القطاع",
+      selectJob: "اختر المسمى الوظيفي",
+      profileCodeNote: "الأكواد المقترحة أكواد داخلية تنظيمية للمنصة وليست أكواداً رسمية للشركة.",
+      profileAccessNote: "يمكن للعامل الاطلاع على ملفه وتعديله، ويستطيع مالك النظام الاطلاع عليه لأغراض إدارة المنصة. لا يستطيع المختص النفسي الاطلاع على بيانات الملف الوظيفي.",
+      editProfile: "تعديل الملف الشخصي",
+      saveProfile: "حفظ الملف الشخصي",
+      cancelEdit: "إلغاء التعديل",
+      profileSaved: "تم حفظ ملفك الوظيفي بنجاح.",
+      profileLoadError: "تعذر تحميل ملفك الوظيفي. حاول مرة أخرى أو تواصل مع مالك النظام.",
+      profileSaveError: "تعذر حفظ الملف الوظيفي. راجع البيانات وحاول مرة أخرى.",
+      profileRequired: "يرجى استكمال الملف الوظيفي وحفظه قبل المتابعة.",
+      invalidDob: "يرجى إدخال تاريخ ميلاد صحيح.",
+      workerProfilesTitle: "الملفات الوظيفية للعاملين",
+      workerProfilesNote: "بيانات الملف الوظيفي الكاملة متاحة لمالك النظام فقط ولا تظهر للمختصين.",
+      noProfiles: "لم يتم تسجيل ملفات وظيفية للعاملين حتى الآن.",
+      ownerProfilesError: "تعذر تحميل الملفات الوظيفية. تحقق من صلاحيات مالك النظام.",
+      sectorExploration: "الاستكشاف والمسح الجيولوجي",
+      sectorDrilling: "الحفر وعمليات الآبار",
+      sectorWellServices: "خدمات الآبار والتدخل والصيانة داخل الآبار",
+      sectorProduction: "الإنتاج وتشغيل الحقول",
+      sectorRefining: "التكرير والبتروكيماويات",
+      sectorMaintenance: "الصيانة والهندسة",
+      sectorLogistics: "الرفع والمعدات والنقل والمناولة",
+      sectorOffshore: "القطاع البحري والمنصات البحرية",
+      sectorHse: "الصحة والسلامة والبيئة والطوارئ",
+      sectorSecurity: "الأمن والحماية",
+      sectorCorporate: "الإدارة والقيادة والموارد البشرية والمالية",
+      sectorMedical: "الخدمات الطبية والمعيشية والمساندة",
       identityLabel: "الحساب الحالي",
       roleOwner: "مالك النظام — Super Admin",
       roleProfessional: "المختص النفسي — Professional",
@@ -651,6 +728,16 @@
 
     if (currentUser && currentRole === "super_admin") {
       loadOwnerRequests();
+      loadOwnerProfiles();
+    }
+    if (currentWorkerProfile && currentRole === "worker") {
+      showProfileSummary(currentWorkerProfile);
+    }
+    if ($("profileSector")) {
+      const selectedSector = $("profileSector").value;
+      const selectedJob = $("profileJobTitle").value;
+      populateProfileSectors(selectedSector);
+      populateProfileJobs(selectedSector, selectedJob);
     }
   }
 
@@ -689,6 +776,834 @@
       "ownerPanel",
       "confirmationPanel"
     ].forEach(hide);
+  }
+
+  const PROFILE_CATALOG = [
+  {
+    "code": "EX",
+    "ar": "الاستكشاف والمسح الجيولوجي",
+    "en": "Exploration & Geosciences",
+    "jobs": [
+      {
+        "title": "مدير الاستكشاف",
+        "code": "EX-001"
+      },
+      {
+        "title": "جيولوجي حقلي",
+        "code": "EX-002"
+      },
+      {
+        "title": "جيولوجي بترول",
+        "code": "EX-003"
+      },
+      {
+        "title": "جيوفيزيائي",
+        "code": "EX-004"
+      },
+      {
+        "title": "مهندس مسح زلزالي",
+        "code": "EX-005"
+      },
+      {
+        "title": "مشغل أجهزة المسح",
+        "code": "EX-006"
+      },
+      {
+        "title": "فني المسح الجيولوجي",
+        "code": "EX-007"
+      },
+      {
+        "title": "محلل بيانات جيوفيزيائية",
+        "code": "EX-008"
+      },
+      {
+        "title": "مساح حقلي",
+        "code": "EX-009"
+      },
+      {
+        "title": "قائد فريق المسح",
+        "code": "EX-010"
+      }
+    ]
+  },
+  {
+    "code": "DR",
+    "ar": "الحفر وعمليات الآبار",
+    "en": "Drilling Operations",
+    "jobs": [
+      {
+        "title": "مدير عمليات الحفر",
+        "code": "DR-001"
+      },
+      {
+        "title": "مهندس الحفر",
+        "code": "DR-002"
+      },
+      {
+        "title": "مشرف الحفر",
+        "code": "DR-003"
+      },
+      {
+        "title": "الحفار",
+        "code": "DR-004"
+      },
+      {
+        "title": "مساعد الحفار",
+        "code": "DR-005"
+      },
+      {
+        "title": "عامل منصة الحفر",
+        "code": "DR-006"
+      },
+      {
+        "title": "عامل برج الحفر",
+        "code": "DR-007"
+      },
+      {
+        "title": "مهندس سوائل الحفر",
+        "code": "DR-008"
+      },
+      {
+        "title": "مشغل مضخات الحفر",
+        "code": "DR-009"
+      },
+      {
+        "title": "مشغل معدات الحفر",
+        "code": "DR-010"
+      },
+      {
+        "title": "مشرف عمليات الآبار",
+        "code": "DR-011"
+      },
+      {
+        "title": "مسؤول التحكم في الآبار",
+        "code": "DR-012"
+      }
+    ]
+  },
+  {
+    "code": "WS",
+    "ar": "خدمات الآبار والتدخل والصيانة داخل الآبار",
+    "en": "Well Services",
+    "jobs": [
+      {
+        "title": "مهندس خدمات الآبار",
+        "code": "WS-001"
+      },
+      {
+        "title": "مهندس التسجيل الكهربائي",
+        "code": "WS-002"
+      },
+      {
+        "title": "مشغل وحدات التسجيل",
+        "code": "WS-003"
+      },
+      {
+        "title": "فني Wireline",
+        "code": "WS-004"
+      },
+      {
+        "title": "فني Coiled Tubing",
+        "code": "WS-005"
+      },
+      {
+        "title": "فني Workover",
+        "code": "WS-006"
+      },
+      {
+        "title": "مشغل وحدات الإسمنت",
+        "code": "WS-007"
+      },
+      {
+        "title": "فني اختبار الآبار",
+        "code": "WS-008"
+      },
+      {
+        "title": "مشغل وحدات الضخ",
+        "code": "WS-009"
+      },
+      {
+        "title": "مشرف خدمات الآبار",
+        "code": "WS-010"
+      }
+    ]
+  },
+  {
+    "code": "PR",
+    "ar": "الإنتاج وتشغيل الحقول",
+    "en": "Production Operations",
+    "jobs": [
+      {
+        "title": "مدير الإنتاج",
+        "code": "PR-001"
+      },
+      {
+        "title": "مهندس إنتاج",
+        "code": "PR-002"
+      },
+      {
+        "title": "مشرف الإنتاج",
+        "code": "PR-003"
+      },
+      {
+        "title": "مشغل غرفة التحكم",
+        "code": "PR-004"
+      },
+      {
+        "title": "مشغل الإنتاج الميداني",
+        "code": "PR-005"
+      },
+      {
+        "title": "مشغل فواصل الضغط",
+        "code": "PR-006"
+      },
+      {
+        "title": "مشغل معالجة الغاز",
+        "code": "PR-007"
+      },
+      {
+        "title": "مشغل محطات الضخ",
+        "code": "PR-008"
+      },
+      {
+        "title": "فني أخذ العينات",
+        "code": "PR-009"
+      },
+      {
+        "title": "مشرف الورديات",
+        "code": "PR-010"
+      },
+      {
+        "title": "مشغل وحدات فصل الغاز",
+        "code": "PR-011"
+      },
+      {
+        "title": "فني الحقول",
+        "code": "PR-012"
+      }
+    ]
+  },
+  {
+    "code": "RP",
+    "ar": "التكرير والبتروكيماويات",
+    "en": "Refining & Petrochemicals",
+    "jobs": [
+      {
+        "title": "مدير عمليات التكرير",
+        "code": "RP-001"
+      },
+      {
+        "title": "مهندس عمليات التكرير",
+        "code": "RP-002"
+      },
+      {
+        "title": "مشغل وحدة التقطير",
+        "code": "RP-003"
+      },
+      {
+        "title": "مشغل الأفران الصناعية",
+        "code": "RP-004"
+      },
+      {
+        "title": "مشغل المفاعلات الكيميائية",
+        "code": "RP-005"
+      },
+      {
+        "title": "مشغل وحدات البلمرة",
+        "code": "RP-006"
+      },
+      {
+        "title": "مشغل وحدات الكبريت",
+        "code": "RP-007"
+      },
+      {
+        "title": "مشغل وحدات الهيدروجين",
+        "code": "RP-008"
+      },
+      {
+        "title": "فني المختبر الكيميائي",
+        "code": "RP-009"
+      },
+      {
+        "title": "محلل كيميائي",
+        "code": "RP-010"
+      },
+      {
+        "title": "مشرف وحدات المعالجة",
+        "code": "RP-011"
+      },
+      {
+        "title": "مشغل وحدات تحميل المنتجات",
+        "code": "RP-012"
+      }
+    ]
+  },
+  {
+    "code": "ME",
+    "ar": "الصيانة والهندسة",
+    "en": "Maintenance & Engineering",
+    "jobs": [
+      {
+        "title": "مدير الصيانة",
+        "code": "ME-001"
+      },
+      {
+        "title": "مهندس الصيانة الميكانيكية",
+        "code": "ME-002"
+      },
+      {
+        "title": "فني الصيانة الميكانيكية",
+        "code": "ME-003"
+      },
+      {
+        "title": "فني الكهرباء",
+        "code": "ME-004"
+      },
+      {
+        "title": "فني الأجهزة والتحكم",
+        "code": "ME-005"
+      },
+      {
+        "title": "مهندس الأجهزة والتحكم",
+        "code": "ME-006"
+      },
+      {
+        "title": "فني اللحام",
+        "code": "ME-007"
+      },
+      {
+        "title": "فني السقالات",
+        "code": "ME-008"
+      },
+      {
+        "title": "فني العزل الحراري",
+        "code": "ME-009"
+      },
+      {
+        "title": "مفتش المعدات",
+        "code": "ME-010"
+      },
+      {
+        "title": "مهندس الاعتمادية",
+        "code": "ME-011"
+      },
+      {
+        "title": "فني صيانة المضخات والضواغط",
+        "code": "ME-012"
+      }
+    ]
+  },
+  {
+    "code": "LL",
+    "ar": "الرفع والمعدات والنقل والمناولة",
+    "en": "Lifting & Logistics",
+    "jobs": [
+      {
+        "title": "مشغل الرافعات المتحركة",
+        "code": "LL-001"
+      },
+      {
+        "title": "مشغل الرافعات البرجية",
+        "code": "LL-002"
+      },
+      {
+        "title": "مشغل الرافعات العلوية",
+        "code": "LL-003"
+      },
+      {
+        "title": "مشغل الرافعة الشوكية",
+        "code": "LL-004"
+      },
+      {
+        "title": "سائق الشاحنات الثقيلة",
+        "code": "LL-005"
+      },
+      {
+        "title": "سائق الحافلات",
+        "code": "LL-006"
+      },
+      {
+        "title": "سائق المركبات الخفيفة",
+        "code": "LL-007"
+      },
+      {
+        "title": "مشغل معدات التحميل",
+        "code": "LL-008"
+      },
+      {
+        "title": "مراقب حركة المركبات",
+        "code": "LL-009"
+      },
+      {
+        "title": "مسؤول المخازن",
+        "code": "LL-010"
+      }
+    ]
+  },
+  {
+    "code": "OM",
+    "ar": "القطاع البحري والمنصات البحرية",
+    "en": "Offshore & Marine",
+    "jobs": [
+      {
+        "title": "مدير المنصة البحرية",
+        "code": "OM-001"
+      },
+      {
+        "title": "مشرف المنصة البحرية",
+        "code": "OM-002"
+      },
+      {
+        "title": "العامل البحري",
+        "code": "OM-003"
+      },
+      {
+        "title": "ضابط السطح",
+        "code": "OM-004"
+      },
+      {
+        "title": "ضابط الملاحة",
+        "code": "OM-005"
+      },
+      {
+        "title": "مهندس السفينة",
+        "code": "OM-006"
+      },
+      {
+        "title": "بحار",
+        "code": "OM-007"
+      },
+      {
+        "title": "مشغل الرافعات البحرية",
+        "code": "OM-008"
+      },
+      {
+        "title": "فني الغوص",
+        "code": "OM-009"
+      },
+      {
+        "title": "مسؤول الإخلاء والإنقاذ البحري",
+        "code": "OM-010"
+      }
+    ]
+  },
+  {
+    "code": "HS",
+    "ar": "الصحة والسلامة والبيئة والطوارئ",
+    "en": "HSE & Emergency",
+    "jobs": [
+      {
+        "title": "مدير الصحة والسلامة",
+        "code": "HS-001"
+      },
+      {
+        "title": "مهندس السلامة",
+        "code": "HS-002"
+      },
+      {
+        "title": "مراقب السلامة",
+        "code": "HS-003"
+      },
+      {
+        "title": "مسؤول تصاريح العمل",
+        "code": "HS-004"
+      },
+      {
+        "title": "مسؤول العزل الكهربائي والميكانيكي",
+        "code": "HS-005"
+      },
+      {
+        "title": "مدير الطوارئ",
+        "code": "HS-006"
+      },
+      {
+        "title": "رجل الإطفاء",
+        "code": "HS-007"
+      },
+      {
+        "title": "فني مكافحة التسرب",
+        "code": "HS-008"
+      },
+      {
+        "title": "عضو فريق الإنقاذ",
+        "code": "HS-009"
+      },
+      {
+        "title": "مسؤول إدارة الأزمات",
+        "code": "HS-010"
+      }
+    ]
+  },
+  {
+    "code": "SE",
+    "ar": "الأمن والحماية",
+    "en": "Security",
+    "jobs": [
+      {
+        "title": "مدير الأمن",
+        "code": "SE-001"
+      },
+      {
+        "title": "مشرف الأمن",
+        "code": "SE-002"
+      },
+      {
+        "title": "فرد الأمن",
+        "code": "SE-003"
+      },
+      {
+        "title": "مراقب كاميرات المراقبة",
+        "code": "SE-004"
+      },
+      {
+        "title": "مسؤول التحكم في الدخول",
+        "code": "SE-005"
+      },
+      {
+        "title": "مشرف الأمن الصناعي",
+        "code": "SE-006"
+      }
+    ]
+  },
+  {
+    "code": "CF",
+    "ar": "الإدارة والقيادة والموارد البشرية والمالية",
+    "en": "Corporate Functions",
+    "jobs": [
+      {
+        "title": "الرئيس التنفيذي",
+        "code": "CF-001"
+      },
+      {
+        "title": "مدير العمليات",
+        "code": "CF-002"
+      },
+      {
+        "title": "مدير الموارد البشرية",
+        "code": "CF-003"
+      },
+      {
+        "title": "مدير الشؤون المالية",
+        "code": "CF-004"
+      },
+      {
+        "title": "محاسب",
+        "code": "CF-005"
+      },
+      {
+        "title": "مراجع داخلي",
+        "code": "CF-006"
+      },
+      {
+        "title": "مسؤول المشتريات",
+        "code": "CF-007"
+      },
+      {
+        "title": "موظف إداري",
+        "code": "CF-008"
+      },
+      {
+        "title": "مسؤول تقنية المعلومات",
+        "code": "CF-009"
+      },
+      {
+        "title": "مسؤول الأمن السيبراني",
+        "code": "CF-010"
+      }
+    ]
+  },
+  {
+    "code": "MC",
+    "ar": "الخدمات الطبية والمعيشية والمساندة",
+    "en": "Medical & Camp Services",
+    "jobs": [
+      {
+        "title": "طبيب الموقع",
+        "code": "MC-001"
+      },
+      {
+        "title": "ممرض الموقع",
+        "code": "MC-002"
+      },
+      {
+        "title": "مسعف الموقع",
+        "code": "MC-003"
+      },
+      {
+        "title": "فني المختبر الطبي",
+        "code": "MC-004"
+      },
+      {
+        "title": "صيدلي الموقع",
+        "code": "MC-005"
+      },
+      {
+        "title": "طباخ الموقع",
+        "code": "MC-006"
+      },
+      {
+        "title": "مسؤول الإعاشة",
+        "code": "MC-007"
+      },
+      {
+        "title": "عامل النظافة الصناعية",
+        "code": "MC-008"
+      },
+      {
+        "title": "مسؤول السكن البحري",
+        "code": "MC-009"
+      },
+      {
+        "title": "مسؤول الخدمات العامة",
+        "code": "MC-010"
+      }
+    ]
+  }
+];
+
+  // =========================================================
+  // 4A. WORKER PROFILE (worker and System Owner only)
+  // =========================================================
+
+  const PROFILE_SECTOR_KEYS = {
+    EX: "sectorExploration", DR: "sectorDrilling", WS: "sectorWellServices",
+    PR: "sectorProduction", RP: "sectorRefining", ME: "sectorMaintenance",
+    LL: "sectorLogistics", OM: "sectorOffshore", HS: "sectorHse",
+    SE: "sectorSecurity", CF: "sectorCorporate", MC: "sectorMedical"
+  };
+
+  function calculateAge(dateValue) {
+    if (!dateValue) return null;
+    const parts = dateValue.split("-").map(Number);
+    if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+    const [year, month, day] = parts;
+    const today = new Date();
+    let age = today.getFullYear() - year;
+    const birthdayPending = (today.getMonth() + 1 < month) ||
+      ((today.getMonth() + 1 === month) && today.getDate() < day);
+    if (birthdayPending) age -= 1;
+    if (age < 0 || age > 120) return null;
+    return age;
+  }
+
+  function sectorLabel(code) {
+    const sector = PROFILE_CATALOG.find((item) => item.code === code);
+    return sector ? (lang === "ar" ? sector.ar : sector.en) : "—";
+  }
+
+  function populateProfileSectors(selectedCode = "") {
+    const select = $("profileSector");
+    if (!select) return;
+    select.replaceChildren();
+    const first = document.createElement("option");
+    first.value = "";
+    first.textContent = t("selectSector");
+    select.appendChild(first);
+    PROFILE_CATALOG.forEach((sector) => {
+      const option = document.createElement("option");
+      option.value = sector.code;
+      option.textContent = lang === "ar" ? sector.ar : sector.en;
+      select.appendChild(option);
+    });
+    select.value = selectedCode;
+    populateProfileJobs(selectedCode);
+  }
+
+  function populateProfileJobs(sectorCode, selectedCode = "") {
+    const select = $("profileJobTitle");
+    if (!select) return;
+    select.replaceChildren();
+    const first = document.createElement("option");
+    first.value = "";
+    first.textContent = t("selectJob");
+    select.appendChild(first);
+    const sector = PROFILE_CATALOG.find((item) => item.code === sectorCode);
+    if (sector) {
+      sector.jobs.forEach((job) => {
+        const option = document.createElement("option");
+        option.value = job.code;
+        option.textContent = job.title;
+        select.appendChild(option);
+      });
+    }
+    select.disabled = !sector;
+    select.value = selectedCode;
+    updateProfileJobCode();
+  }
+
+  function updateProfileJobCode() {
+    const select = $("profileJobTitle");
+    const code = select?.value || "";
+    if ($("profileJobCode")) $("profileJobCode").value = code;
+  }
+
+  function updateProfileAge() {
+    const age = calculateAge($("profileDob")?.value);
+    if ($("profileAge")) {
+      $("profileAge").value = age === null ? "" : String(age);
+    }
+  }
+
+  function setProfileFormValues(profile) {
+    $("profileFullName").value = profile?.full_name || "";
+    $("profileDob").value = profile?.date_of_birth || "";
+    $("profileCompany").value = profile?.company_name || "";
+    populateProfileSectors(profile?.sector_code || "");
+    populateProfileJobs(profile?.sector_code || "", profile?.job_code || "");
+    updateProfileAge();
+  }
+
+  function showProfileSummary(profile) {
+    const age = calculateAge(profile.date_of_birth);
+    $("profileViewName").textContent = profile.full_name || "—";
+    $("profileViewDob").textContent = profile.date_of_birth || "—";
+    $("profileViewAge").textContent = age === null ? "—" : String(age);
+    $("profileViewCompany").textContent = profile.company_name || "—";
+    $("profileViewSector").textContent = sectorLabel(profile.sector_code);
+    const sector = PROFILE_CATALOG.find((item) => item.code === profile.sector_code);
+    const job = sector?.jobs.find((item) => item.code === profile.job_code);
+    $("profileViewJob").textContent = job?.title || profile.job_title || "—";
+    $("profileViewCode").textContent = profile.job_code || "—";
+  }
+
+  async function loadWorkerProfile() {
+    if (!client || !currentUser || currentRole !== "worker") return false;
+    hide("consentPanel");
+    hide("supportForm");
+    hide("profileSummary");
+    message("profileMessage", "");
+    const { data, error } = await client
+      .from("omhsq_worker_profiles")
+      .select("user_id, full_name, date_of_birth, company_name, sector_code, job_title, job_code")
+      .eq("user_id", currentUser.id)
+      .maybeSingle();
+    if (error) {
+      currentWorkerProfile = null;
+      console.error("Worker profile read error:", error);
+      hide("profileForm");
+      message("profileMessage", t("profileLoadError"), "error");
+      return false;
+    }
+    if (!data) {
+      currentWorkerProfile = null;
+      setProfileFormValues(null);
+      show("profileForm");
+      hide("cancelProfileEditBtn");
+      hide("consentPanel");
+      message("profileMessage", t("profileRequired"));
+      return false;
+    }
+    currentWorkerProfile = data;
+    setProfileFormValues(data);
+    showProfileSummary(data);
+    show("profileSummary");
+    hide("profileForm");
+    show("consentPanel");
+    await loadConsentState();
+    return true;
+  }
+
+  async function saveWorkerProfile(event) {
+    event.preventDefault();
+    if (!client || !currentUser || currentRole !== "worker") return;
+    const fullName = $("profileFullName").value.trim();
+    const dob = $("profileDob").value;
+    const company = $("profileCompany").value.trim();
+    const sectorCode = $("profileSector").value;
+    const jobCode = $("profileJobTitle").value;
+    const sector = PROFILE_CATALOG.find((item) => item.code === sectorCode);
+    const job = sector?.jobs.find((item) => item.code === jobCode);
+    const age = calculateAge(dob);
+    if (!fullName || !dob || age === null || !company || !sector || !job) {
+      message("profileMessage", dob && age === null ? t("invalidDob") : t("profileRequired"), "error");
+      return;
+    }
+    const payload = {
+      user_id: currentUser.id,
+      full_name: fullName,
+      date_of_birth: dob,
+      company_name: company,
+      sector_code: sectorCode,
+      job_title: job.title,
+      job_code: job.code
+    };
+    const button = $("saveProfileBtn");
+    setBusy(button, true, t("processing"));
+    try {
+      const { error } = await client
+        .from("omhsq_worker_profiles")
+        .upsert(payload, { onConflict: "user_id" });
+      if (error) {
+        console.error("Worker profile save error:", error);
+        message("profileMessage", t("profileSaveError") + " " + error.message, "error");
+        return;
+      }
+      await loadWorkerProfile();
+      message("profileMessage", t("profileSaved"), "success");
+    } catch (error) {
+      console.error("Worker profile save exception:", error);
+      message("profileMessage", t("profileSaveError"), "error");
+    } finally {
+      setBusy(button, false, t("saveProfile"));
+    }
+  }
+
+  function editWorkerProfile() {
+    if (!currentUser || currentRole !== "worker" || !currentWorkerProfile) return;
+    setProfileFormValues(currentWorkerProfile);
+    hide("profileSummary");
+    show("profileForm");
+    show("cancelProfileEditBtn");
+    message("profileMessage", "");
+  }
+
+  async function cancelWorkerProfileEdit() {
+    await loadWorkerProfile();
+  }
+
+  async function loadOwnerProfiles() {
+    if (!client || !currentUser || currentRole !== "super_admin") return;
+    const tbody = $("ownerProfileRows");
+    if (!tbody) return;
+    tbody.replaceChildren();
+    message("ownerProfileMessage", "");
+    const { data, error } = await client
+      .from("omhsq_worker_profiles")
+      .select("user_id, full_name, date_of_birth, company_name, sector_code, job_title, job_code")
+      .order("full_name", { ascending: true })
+      .limit(500);
+    if (error) {
+      console.error("Owner profile read error:", error);
+      message("ownerProfileMessage", t("ownerProfilesError") + " " + error.message, "error");
+      return;
+    }
+    if (!data?.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 7;
+      td.textContent = t("noProfiles");
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+    data.forEach((profile) => {
+      const tr = document.createElement("tr");
+      const values = [
+        profile.full_name,
+        profile.date_of_birth,
+        calculateAge(profile.date_of_birth) ?? "—",
+        profile.company_name,
+        sectorLabel(profile.sector_code),
+        profile.job_title,
+        profile.job_code
+      ];
+      values.forEach((value) => {
+        const td = document.createElement("td");
+        td.textContent = String(value ?? "—");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
   }
 
   // =========================================================
@@ -920,7 +1835,7 @@
     message("formMessage", "");
     message("consentMessage", "");
 
-    await loadConsentState();
+    await loadWorkerProfile();
   }
 
   async function submitSupportRequest(event) {
@@ -1322,6 +2237,7 @@
       if (currentRole === "super_admin") {
         show("ownerPanel");
         await loadOwnerRequests();
+        await loadOwnerProfiles();
 
       } else if (currentRole === "professional") {
         show("professionalPanel");
@@ -1695,6 +2611,28 @@
     );
   }
 
+  if ($("profileSector")) {
+    $("profileSector").addEventListener("change", () => {
+      populateProfileJobs($("profileSector").value);
+    });
+  }
+  if ($("profileJobTitle")) {
+    $("profileJobTitle").addEventListener("change", updateProfileJobCode);
+  }
+  if ($("profileDob")) {
+    $("profileDob").addEventListener("change", updateProfileAge);
+    $("profileDob").max = new Date().toISOString().slice(0, 10);
+  }
+  if ($("profileForm")) {
+    $("profileForm").addEventListener("submit", saveWorkerProfile);
+  }
+  if ($("editProfileBtn")) {
+    $("editProfileBtn").addEventListener("click", editWorkerProfile);
+  }
+  if ($("cancelProfileEditBtn")) {
+    $("cancelProfileEditBtn").addEventListener("click", cancelWorkerProfileEdit);
+  }
+
   if ($("refreshProfessional")) {
     $("refreshProfessional").addEventListener(
       "click",
@@ -1705,7 +2643,10 @@
   if ($("refreshOwner")) {
     $("refreshOwner").addEventListener(
       "click",
-      loadOwnerRequests
+      async () => {
+        await loadOwnerRequests();
+        await loadOwnerProfiles();
+      }
     );
   }
 
@@ -1769,6 +2710,7 @@
   // =========================================================
 
   applyLanguage();
+  populateProfileSectors();
   setAuthMode("login");
   clearUserIdentity();
   refreshView();
